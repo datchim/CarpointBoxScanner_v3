@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/llserial2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.1"
+        android:orientation="vertical"
+        android:focusableInTouchMode="true">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/type"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+
+        <com.carpoint.boxscanner.main.CustomAutoCompleteTextView
+            android:id="@+id/autocompletetextview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/dvacetDva" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:id="@+id/serialnumbertxtv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/serialNumber"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+
+        <EditText
+            android:id="@+id/editSerial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number"
+            android:minLines="2"
+            android:textSize="@dimen/dvacetDva" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/black" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llscroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_weight="0.1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <ScrollView
+            android:id="@+id/ScrollView"
+            style="@style/MyScrollbar"
+            android:layout_width="match_parent"
+            android:paddingRight="5dp"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/questions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"></LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/llsign"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.1"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:text="@string/makeSign"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+
+        <com.kyanogen.signatureview.SignatureView xmlns:sign="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/signature_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            sign:backgroundColor="#ffffff"
+            sign:enableSignature="true"
+            sign:penColor="#000000"
+            sign:penSize="5dp" />
+
+
+        <Button
+            android:id="@+id/btnClear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="10dp"
+            android:text="@string/clear"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@android:color/black" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="0.7"
+            android:drawableLeft="@android:drawable/ic_menu_revert"
+            android:text="@string/back"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1.3"
+            android:drawableRight="@android:drawable/ic_media_play"
+            android:text="@string/next"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+
+        <Button
+            android:id="@+id/btnSend"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1.3"
+            android:text="@string/send"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva"
+            android:visibility="gone" />
+    </LinearLayout>
+
+</LinearLayout>

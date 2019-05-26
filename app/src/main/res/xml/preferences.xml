@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- GENERAL SETTINGS -->
+    <PreferenceCategory android:title="@string/Preferences_General_settings">
+        <EditTextPreference
+            android:key="url_preference"
+            android:title="@string/Preferences_Carpoint_partners_url" />
+        <EditTextPreference
+            android:key="username_preference"
+            android:title="@string/Preferences_Carpoint_partners_Username" />
+        <EditTextPreference
+            android:inputType="textPassword"
+            android:key="passwort_preference"
+            android:title="@string/Preferences_Carpoint_partners_Password" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

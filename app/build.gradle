@@ -1,0 +1,29 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '27.0.3'
+
+    defaultConfig {
+        applicationId "com.carpoint.boxscanner"
+        minSdkVersion 24
+        targetSdkVersion 26
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+dependencies {
+    implementation 'com.android.support:appcompat-v7:25.3.1'
+    implementation 'com.kyanogen.signatureview:signature-view:1.2'
+    implementation 'com.mindorks:paracamera:0.2.2'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+}

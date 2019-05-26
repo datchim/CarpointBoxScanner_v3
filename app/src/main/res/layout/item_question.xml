@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+
+        <ImageButton
+            android:id="@+id/btn_error"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/imagebutton_selector" />
+
+        <TextView
+            android:id="@+id/textErrCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+    </LinearLayout>
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rgNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/osmnact"
+            android:layout_weight="1"
+            android:scaleX="1.2"
+            android:scaleY="1.2"
+            android:text="@string/no"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/osmnact" />
+
+        <RadioButton
+            android:id="@+id/rgYes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:scaleX="1.2"
+            android:scaleY="1.2"
+            android:text="@string/yes"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/osmnact" />
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/textPrefill"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/osmnact" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="8dp"
+        android:background="@android:color/black" />
+</LinearLayout>

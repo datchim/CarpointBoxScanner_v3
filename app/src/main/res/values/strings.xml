@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+ Copyright (C) 2010 ZXing authors
+ Copyright 2011 Robert Theis
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<resources>
+
+    <string name="appName">Pallet controller</string>
+    <string name="carid">carid</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="notavailable">N/A</string>
+    <string name="ok">OK</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_exit">Exit</string>
+    <string name="search">Search</string>
+    <string name="cancel">Cancel</string>
+    <string name="clear">Clear</string>
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="send">Send</string>
+    <string name="save">Save</string>
+    <string name="type">Type</string>
+    <string name="photoBox1">Create photo 1</string>
+    <string name="photoBox2">Create photo 2</string>
+    <string name="makeSign">Create sign</string>
+    <string name="success">Success</string>
+    <string name="pdfCreated">Protocol was sucessfully created.</string>
+    <string name="serialNumber">Serial number</string>
+    <string name="again">Again</string>
+    <string name="takePhoto">Take photo</string>
+    <string name="startScanning">Start controlling</string>
+    <string name="msg_GPS_is_disable">GPS Position is disabled. Enable it and try again.</string>
+    <string name="msg_GPS_Position_not_ready">GPS Position not ready</string>
+    <string name="msg_Internet_is_disable">Internet is disabled. Enable it and try again.</string>
+    <string name="Preferences_General_settings">General Settings</string>
+    <string name="waitUpload">Wait, informations are uploading...</string>
+    <string name="waitDownload">Wait, informations are downloading...</string>
+    <string name="waitUploadRest">There is some uploaded protocols in saved in the tablet. Trying to upload them now...</string>
+    <string name="Preferences_Carpoint_partners_url">Pallet Controller URL</string>
+    <string name="Preferences_Carpoint_partners_Username">Username</string>
+    <string name="Preferences_Carpoint_partners_Password">Password</string>
+    <string name="permissions_needed">All of permissions are needed!</string>
+    <string name="emptyPhoto2">You have skipped second image</string>
+    <string name="download_questions">Dowload question</string>
+    <string name="msg_actualize">There is new version of Pallet Controller. Now you will be redirected to Google Play. Please hit button actualize.</string>
+
+
+    <string name="fillAll">Fill in all informations</string>
+    <string name="questionsDownloaded">Questions was sucessfully downloaded</string>
+    <string name="msg_error_hhtp">Error during communicating with server</string>
+    <string name="msg_error_json">Questions file corupted</string>
+    <string name="msg_error_unauthorized">Wrong username or password!</string>
+    <string name="noQuestion">No questions downloaded, trying now. Try this later.</string>
+    <string name="title_activity_scanning">Pallet controlling</string>
+    <string name="settup">Please sett up everything in settings.</string>
+    <string name="error">Error</string>
+    <string name="palletReady">Is the palette ready for shipment?</string>
+    <string name="filesSaved">Server is now unreachable. Protocol will be sended automatically as soon as possible.</string>
+
+    <string name="noNFC">Your phone does not support NFC</string>
+    <string name="NFCwrite">Write into NFC</string>
+    <string name="disableNFC">Please enable NFC</string>
+    <string name="Please_touch_the_NFC_TAG">Please touch the NFC Tag!</string>
+    <string name="registration_cancelled">NFC Tag registration canceled!</string>
+    <string name="msg_write_VINCODE_successful">Success: Data written to NFC!</string>
+    <string name="msg_write_VINCODE_failed">Error: Writing of data failed</string>
+
+    <string-array name="box_types">
+        <item>517996</item>
+        <item>T52457</item>
+        <item>T52463</item>
+        <item>T52464</item>
+        <item>T52465</item>
+        <item>T52466</item>
+        <item>T52471</item>
+        <item>T52472</item>
+        <item>T52473</item>
+        <item>T52474</item>
+        <item>T52477</item>
+        <item>T52478</item>
+        <item>T52479</item>
+        <item>T52480</item>
+        <item>T52481</item>
+        <item>T52508</item>
+        <item>T52508</item>
+        <item>T52516</item>
+        <item>T52517</item>
+        <item>T52518</item>
+        <item>T52519</item>
+        <item>T52520</item>
+        <item>T52524</item>
+        <item>T52525</item>
+        <item>T52615</item>
+        <item>T52616</item>
+        <item>T52870</item>
+        <item>T52871</item>
+        <item>T52872</item>
+        <item>T52877</item>
+        <item>T537152</item>
+        <item>T537153</item>
+        <item>T565126</item>
+        <item>T565127</item>
+        <item>T565128</item>
+        <item>T565129</item>
+        <item>T566103</item>
+        <item>T566104</item>
+        <item>T566105</item>
+        <item>T566111</item>
+        <item>T566112</item>
+    </string-array>
+    <string name="lang">Language:</string>
+    <string name="lang_en">English</string>
+    <string name="lang_de">Deutsch</string>
+    <string name="lang_cs">Čeština</string>
+    <string name="backHit">Press back a second time to finish</string>
+    <string name="noScenary">Scenary was not found</string>
+    <string name="machen_sie_ein_foto">Create photo</string>
+    <string name="showPhoto">Show photo</string>
+    <string name="photoError">Photo - error</string>
+    <string name="add_error">Add error</string>
+    <string name="msg_no_error_codes">No error codes found</string>
+    <string name="btn_add_error">Add new error</string>
+    <string name="btn_add_error_photo">Add new photo</string>
+    <string name="error_add_title">Add new error</string>
+    <string name="another_errors">Another errors</string>
+    <string name="product_have_error">Product must be free of errors</string>
+    <string name="lang_ro">Romanian</string>
+    <string name="protocol_not_found">Protocol was not found.</string>
+    <string name="protocol_downloaded">Protocol successfully found.</string>
+    <string name="list_of_errors">List of errors</string>
+    <string name="photo_required">Photo required?</string>
+    <string name="photo_save">Photo saved</string>
+    <string name="common_errors">Common errors</string>
+    <string name="nfc_write">NFC write</string>
+    <string name="youHave">You have</string>
+    <string name="errors">errors!</string>
+    <string name="filled">filled</string>
+    <string name="quickSearch">Quick search (B3)</string>
+</resources>

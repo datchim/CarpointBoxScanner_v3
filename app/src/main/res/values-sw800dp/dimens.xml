@@ -1,0 +1,8 @@
+<resources>
+    <dimen name="deset">18dp</dimen>
+    <dimen name="patnact">27dp</dimen>
+	<dimen name="osmnact">32dp</dimen>
+    <dimen name="dvacet">35dp</dimen>
+    <dimen name="dvacetDva">45dp</dimen>
+    <dimen name="dvacetPet">50dp</dimen>
+</resources>
