@@ -43,9 +43,9 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
         mContext = context;
         this.execute();
         this.onFinish = onFinish;
-        if (isQuestions){
+        if (isQuestions)
             endUrl ="getQuestions";
-        }else
+        else
             endUrl ="getProtoErrorList";
 
     }
@@ -70,7 +70,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
         mContext = context;
         this.execute(ids,bitmapSign);
         this.onFinish = onFinish;
-        this.endUrl = "resolve";
+        this.endUrl = "resolveError";
     }
     //sendProtocol
     public HTTPcomm(Context context, JSONObject head, JSONArray answers, JSONArray errorAnswers, OnFinish onFinish, ArrayList<Pair<Integer, Bitmap>> photos, ArrayList<Pair<String, Bitmap>> photosError, Bitmap sign) {
@@ -81,7 +81,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
     }
 
     @Override
-    protected String doInBackground(Object... params) {
+    protected Object doInBackground(Object... params) {
         try {
             prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
             String url = prefs.getString("url_preference", "");
@@ -136,6 +136,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                 break;
 
                 case "getPhoto":
+                    isPhoto = true;
                     JSONObject photo = new JSONObject();
                     photo.accumulate("id_protocol",params[0]);
                     photo.accumulate("filename",params[1]);
@@ -151,7 +152,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
                 break;
 
-                case "resolve":
+                case "resolveError":
                     writeText(os, "login", customer.toString());
                     writeText(os, "errors", params[0].toString());
                     writeBitmap(os, "sign", (Bitmap)params[1], 100);
@@ -184,13 +185,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                  break;
             }
 
-
-
-
             // Get data
-
-
-
             if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 if (!isPhoto) {
                     String receivestring = "";
@@ -220,7 +215,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                     return receivestring;
                 }else{
                     Bitmap b = BitmapFactory.decodeStream(con.getInputStream());
-                   // return b;
+                    return b;
                 }
             } else if (con.getResponseCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
                 Functions.toast(mContext, R.string.msg_error_unauthorized);
@@ -272,29 +267,23 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
     @Override
     protected void onPostExecute(Object result) {
         super.onPostExecute(result);
-            String resultString = "";
-            Bitmap resultBitmap ;
-            if (result instanceof  String)
-            resultString = (String) result;
-            else
-                resultBitmap = (Bitmap) result;
+
+            if (endUrl.equals("getProtoErrorList") || endUrl.equals("getProtocol")|| endUrl.equals("resolveError")){
+                try {
+                    if (onFinish != null)
+                        onFinish.onResult((String)result);
+                } catch (Exception e) {
+                    Functions.toast(mContext,R.string.protocol_not_found);
+                }
+            }
 //            Log.e("result",result);
             switch (endUrl){
-
-               case "getProtoErrorList":
-                   try {
-                       if (onFinish != null)
-                           onFinish.onResult(resultString);
-                   } catch (Exception e) {
-                       Functions.toast(mContext,R.string.protocol_not_found);
-                   }
-               break;
 
                case "getQuestions":
                    try {
                        if (result != null) {
                            try {
-                               JSONObject o = new JSONObject(resultString);
+                               JSONObject o = new JSONObject((String)result);
                                Functions.toast(mContext, R.string.questionsDownloaded);
                                FileMan file = new FileMan(mContext, "");
                                file.saveDoc("questions.json", o);
@@ -304,59 +293,37 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                        }
 
                        if (onFinish != null)
-                           onFinish.onResult(resultString);
+                           onFinish.onResult((String)result);
                    } catch (Exception e) {
                        Functions.toast(mContext, R.string.msg_error_hhtp);
                    }
                 break;
 
-                case "getProtocol":
+                case "getPhoto":
                     try {
-                        if (onFinish != null)
-                            onFinish.onResult(resultString);
+                        if (onFinishBitmap != null)
+                            onFinishBitmap.onResult((Bitmap)result);
                     } catch (Exception e) {
                         Functions.toast(mContext,R.string.protocol_not_found);
                     }
-                 break;
+                    break;
 
-                case "resolve":
-                    try {
-                        if (onFinish != null)
-                            onFinish.onResult(resultString);
-                    } catch (Exception e) {
-                        Functions.toast(mContext,R.string.protocol_not_found);
-                    }
-                break;
 
                 case "sendProtocol":
                     try {
-                        boolean save = false;
+
                         if (result != null) {
-                            JSONObject obj = new JSONObject(resultString);
+                            JSONObject obj = new JSONObject((String)result);
                             String tmp = obj.optString("status","");
                             if (onFinish != null)
                                 onFinish.onResult(tmp);
-                            if (tmp == null || !tmp.equals("OK"))
-                                save = true;
+
                         } else {
                             if (onFinish != null)
                                 onFinish.onResult(null);
-                            save = true;
+
                         }
 
-                        /*if (save) {
-                            FileMan f = new FileMan(mContext, "to_send_" + new Date().getTime());
-                            f.saveDoc("head.json", head);
-                            f.saveDoc("answers.json", answers);
-                            f.saveDoc("error answers.json", errorAnswers);
-                            f.saveBitmap("sign.jpg", sign);
-                            for (int i = 0; i < photos.size(); i++) {
-                                f.saveBitmap("photo_" + photos.get(i).first + ".jpg", photos.get(i).second);
-                            }
-                            for (int i = 0; i < photosErr.size(); i++) {
-                                f.saveBitmap("err_photo_" + photosErr.get(i).first + ".jpg", photosErr.get(i).second);
-                            }
-                        }*/
                     } catch (Exception e) {
                         Functions.err(e);
                         if (onFinish != null)
@@ -366,20 +333,6 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
 
             }
     }
-   // bitmap
-    /*@Override
-    protected void onPostExecute(Bitmap result) {
-        super.onPostExecute(result);
-        try {
-            if (onFinishBitmap != null)
-                onFinishBitmap.onResult(result);
-        } catch (Exception e) {
-            Functions.toast(mContext,R.string.protocol_not_found);
-        }
-    }*/
-
-
-
 
     public interface OnFinish {
         void onResult(String response);

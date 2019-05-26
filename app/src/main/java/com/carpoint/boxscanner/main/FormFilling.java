@@ -48,6 +48,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 
 public class FormFilling extends AppCompatActivity {
@@ -334,6 +335,17 @@ public class FormFilling extends AppCompatActivity {
                             if (response != null && response.length() > 0)
                                 showDialogSuccess();
                             else {
+                                FileMan f = new FileMan(FormFilling.this, "to_send_" + new Date().getTime());
+                                f.saveDoc("head.json", head);
+                                f.saveDoc("answers.json", answers);
+                                f.saveDoc("error answers.json", errorAnswers);
+                                f.saveBitmap("sign.jpg", bitmapSign);
+                                for (int i = 0; i < photos.size(); i++) {
+                                    f.saveBitmap("photo_" + photos.get(i).first + ".jpg", photos.get(i).second);
+                                }
+                                for (int i = 0; i < photosErr.size(); i++) {
+                                    f.saveBitmap("err_photo_" + photosErr.get(i).first + ".jpg", photosErr.get(i).second);
+                                }
                                 showDialogError();
                             }
                         }

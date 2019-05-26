@@ -117,7 +117,6 @@ public class ErrorListDialog {
                             mWaitDownloadDialog.setCancelable(false);
                             mWaitDownloadDialog.show();
                             new HTTPcomm(mActivity, ids, bitmapSign, new HTTPcomm.OnFinish() {
-                        //    new CPPresolve(mActivity, ids, bitmapSign, new CPPresolve.OnFinish() {
                                 @Override
                                 public void onResult(String response) {
                                     if (response != null) {
@@ -245,7 +244,8 @@ public class ErrorListDialog {
                                     }).create();
                     mWaitDownloadDialog.setCancelable(false);
                     mWaitDownloadDialog.show();
-                    new CPPgetPhoto(mActivity, id_protocol, group.optString("answer", ""), new CPPgetPhoto.OnFinish() {
+
+                    new HTTPcomm(mActivity, id_protocol, group.optString("answer", ""), new HTTPcomm.OnFinishBitmap() {
                         @Override
                         public void onResult(Bitmap response) {
                             mWaitDownloadDialog.dismiss();
@@ -255,7 +255,7 @@ public class ErrorListDialog {
                                 image.setImageBitmap(response);
                             }
                         }
-                    }).execute();
+                    });
                 }
             });
         } else {
