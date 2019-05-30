@@ -38,7 +38,6 @@ import android.widget.Toast;
 
 import com.carpoint.boxscanner.MainActivity;
 import com.carpoint.boxscanner.R;
-import com.google.gson.JsonArray;
 import com.kyanogen.signatureview.SignatureView;
 import com.mindorks.paracamera.Camera;
 
@@ -49,7 +48,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 
 public class FormFilling extends AppCompatActivity {
 
@@ -314,24 +312,10 @@ public class FormFilling extends AppCompatActivity {
                     mWaitUploadDialog.setCancelable(false);
                     mWaitUploadDialog.show();
 
-
-                    /*new CPPsendPdf(FormFilling.this, head, answers, errorAnswers, new CPPsendPdf.OnFinish() {
-                        @Override
-                        public void onResult(String response) {
-                            mWaitUploadDialog.dismiss();
-
-                            if (response != null && response.length() > 0)
-                                showDialogSuccess();
-                            else {
-                                showDialogError();
-                            }
-                        }
-                    }, photos, photosErr, bitmapSign).execute();*/
                     new HTTPcomm(FormFilling.this, head, answers, errorAnswers, new HTTPcomm.OnFinish() {
                         @Override
                         public void onResult(String response) {
                             mWaitUploadDialog.dismiss();
-                            Log.e("server response", response);
                             if (response != null && response.length() > 0)
                                 showDialogSuccess();
                             else {

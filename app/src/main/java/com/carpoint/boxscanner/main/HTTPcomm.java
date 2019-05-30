@@ -113,10 +113,8 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
             con.connect();
 
             OutputStream os = con.getOutputStream();
+
             //Write login, form and error answers
-
-
-
             boolean isPhoto = false;
             switch (endUrl){
                 case "getProtoErrorList":
@@ -253,7 +251,6 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
             os.write(("Content-Transfer-Encoding: binary\r\n").getBytes());
             os.write("\r\n".getBytes());
 
-
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, bos);
 
@@ -276,7 +273,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                     Functions.toast(mContext,R.string.protocol_not_found);
                 }
             }
-//            Log.e("result",result);
+
             switch (endUrl){
 
                case "getQuestions":
@@ -317,11 +314,9 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                             String tmp = obj.optString("status","");
                             if (onFinish != null)
                                 onFinish.onResult(tmp);
-
                         } else {
                             if (onFinish != null)
                                 onFinish.onResult(null);
-
                         }
 
                     } catch (Exception e) {

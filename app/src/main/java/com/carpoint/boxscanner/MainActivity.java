@@ -1,13 +1,5 @@
 package com.carpoint.boxscanner;
 
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.text.Normalizer;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.Locale;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -18,14 +10,12 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Rect;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
@@ -34,25 +24,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.carpoint.boxscanner.main.CPPgetErrorListProtocol;
-import com.carpoint.boxscanner.main.CPPgetProtocol;
-import com.carpoint.boxscanner.main.CPPgetQuestions;
 import com.carpoint.boxscanner.main.CPPsendRest;
 import com.carpoint.boxscanner.main.CheckVersion;
 import com.carpoint.boxscanner.main.ErrorListDialog;
@@ -66,6 +44,11 @@ import com.carpoint.boxscanner.main.PreferencesActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.Locale;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -96,7 +79,7 @@ public class MainActivity extends ActionBarActivity {
                         startActivity(intent);
                     } else {
                         Functions.toast(MainActivity.this, R.string.noQuestion);
-                        new CPPgetQuestions(MainActivity.this, new CPPgetQuestions.OnFinish() {
+                        new HTTPcomm(MainActivity.this, new HTTPcomm.OnFinish() {
                             @Override
                             public void onResult(String response) {
                                 if (response != null) {
@@ -105,7 +88,7 @@ public class MainActivity extends ActionBarActivity {
                                     startActivity(intent);
                                 }
                             }
-                        }).execute();
+                        },true);
                     }
                 }
             });
@@ -127,7 +110,6 @@ public class MainActivity extends ActionBarActivity {
                                     }).create();
                     mWaitDownloadDialog.setCancelable(false);
                     mWaitDownloadDialog.show();
-                 //   new CPPgetErrorListProtocol(MainActivity.this, new CPPgetErrorListProtocol.OnFinish() {
                     new HTTPcomm(MainActivity.this, new HTTPcomm.OnFinish() {
                         @Override
                         public void onResult(String response) {
@@ -344,7 +326,6 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.download_questions) {
             if (Functions.checkInternetEnable(MainActivity.this)) {
                 new HTTPcomm(this,null,true);
-            //    new CPPgetQuestions(this,null).execute();
             }
             return true;
         }

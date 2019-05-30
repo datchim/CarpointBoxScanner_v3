@@ -3,18 +3,10 @@ package com.carpoint.boxscanner.main;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Handler;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -26,24 +18,19 @@ import android.widget.Toast;
 
 import com.carpoint.boxscanner.MainActivity;
 import com.carpoint.boxscanner.R;
-import com.google.gson.JsonObject;
 import com.kyanogen.signatureview.SignatureView;
-import com.mindorks.paracamera.Camera;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
-public class ErrorListDialog {
+public class ErrorListDialogOld{
 
 
     public EditText editType, editSerial;
     public Button btnSearch;
     private JSONArray mProtocols;
     private Dialog dialog;
-    private LinearLayout llProtocols, llHead;
+    private LinearLayout llProtocols,llHead;
     private Activity mActivity;
     private String actualLang = MainActivity.language;
     private boolean showSign;
@@ -51,8 +38,7 @@ public class ErrorListDialog {
     private SignatureView signatureView;
 
 
-    public ErrorListDialog() {
-
+    public ErrorListDialogOld() {
     }
 
     public void showDialog(final Activity activity, JSONArray protocols) {
