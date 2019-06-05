@@ -19,6 +19,13 @@
             android:layout_weight="0.1"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/dvacetDva" />
+        <TextView
+            android:id="@+id/textErrCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="3x"
+            android:textSize="@dimen/dvacetDva" />
 
         <ImageButton
             android:id="@+id/btn_error"
@@ -28,13 +35,7 @@
             android:scaleType="fitCenter"
             android:src="@drawable/imagebutton_selector" />
 
-        <TextView
-            android:id="@+id/textErrCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="3x"
-            android:textSize="@dimen/dvacetDva" />
+
     </LinearLayout>
     <EditText
         android:id="@+id/editText"

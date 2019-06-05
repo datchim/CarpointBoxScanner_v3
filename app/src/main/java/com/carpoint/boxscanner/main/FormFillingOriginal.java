@@ -19,7 +19,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
@@ -51,7 +50,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
-public class FormFilling extends AppCompatActivity {
+public class FormFillingOriginal extends AppCompatActivity {
 
     public static final String MIME_TEXT_PLAIN = "text/plain";
     public AlertDialog mWaitUploadDialog, mWaitDownloadDialog;
@@ -93,7 +92,7 @@ public class FormFilling extends AppCompatActivity {
 
 
         try {
-            FileMan fileMan = new FileMan(FormFilling.this, "");
+            FileMan fileMan = new FileMan(FormFillingOriginal.this, "");
             String data = fileMan.getDoc("questions.json");
             plans = new JSONObject(data);
 
@@ -207,7 +206,7 @@ public class FormFilling extends AppCompatActivity {
                                         params.put("id_plan", tmp.optJSONObject(selectedPlanIndex).optInt("id_plan",-1));
                                     }
 
-                                    mWaitDownloadDialog = new AlertDialog.Builder(FormFilling.this)
+                                    mWaitDownloadDialog = new AlertDialog.Builder(FormFillingOriginal.this)
                                             .setView(getLayoutInflater().inflate(R.layout.wait_download, null))
                                             .setNegativeButton(R.string.cancel,
                                                     new DialogInterface.OnClickListener() {
@@ -221,7 +220,7 @@ public class FormFilling extends AppCompatActivity {
                                                     }).create();
                                     mWaitDownloadDialog.setCancelable(false);
                                     mWaitDownloadDialog.show();
-                                    new HTTPcomm(FormFilling.this, params, new HTTPcomm.OnFinish() {
+                                    new HTTPcomm(FormFillingOriginal.this, params, new HTTPcomm.OnFinish() {
 
                                         @Override
                                         public void onResult(String response) {
@@ -233,7 +232,7 @@ public class FormFilling extends AppCompatActivity {
                                                     if (tmp.has("answers")) {
                                                         answersPrefill = tmp.optJSONArray("answers");
                                                         refresh();
-                                                        Functions.toast(FormFilling.this, R.string.protocol_downloaded);
+                                                        Functions.toast(FormFillingOriginal.this, R.string.protocol_downloaded);
                                                     }
 
                                                     if (mWaitDownloadDialog != null)
@@ -247,7 +246,7 @@ public class FormFilling extends AppCompatActivity {
                                     });
                                 }
                             } else {
-                                Toast.makeText(FormFilling.this, R.string.noScenary, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(FormFillingOriginal.this, R.string.noScenary, Toast.LENGTH_SHORT).show();
                             }
                         }
                     } else if (actualLayout == layoutCount - 1) {
@@ -261,7 +260,7 @@ public class FormFilling extends AppCompatActivity {
                         refresh();
                     } else {
 
-                        Toast.makeText(FormFilling.this, R.string.fillAll, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(FormFillingOriginal.this, R.string.fillAll, Toast.LENGTH_SHORT).show();
                     }
 
                 } catch (Exception e) {
@@ -290,7 +289,7 @@ public class FormFilling extends AppCompatActivity {
                     bitmapSign = signatureView.getSignatureBitmap();
                     if (bitmapSign == null) {
 
-                        Toast.makeText(FormFilling.this, R.string.fillAll, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(FormFillingOriginal.this, R.string.fillAll, Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -299,7 +298,7 @@ public class FormFilling extends AppCompatActivity {
                     head.put("id_plan", selectedPlan.optString("id_plan"));
                     Log.e("answers", answers.toString());
 
-                    mWaitUploadDialog = new AlertDialog.Builder(FormFilling.this)
+                    mWaitUploadDialog = new AlertDialog.Builder(FormFillingOriginal.this)
                             .setView(getLayoutInflater().inflate(R.layout.wait_upload, null))
                             .setNegativeButton(R.string.cancel,
                                     new DialogInterface.OnClickListener() {
@@ -314,14 +313,14 @@ public class FormFilling extends AppCompatActivity {
                     mWaitUploadDialog.setCancelable(false);
                     mWaitUploadDialog.show();
 
-                    new HTTPcomm(FormFilling.this, head, answers, errorAnswers, new HTTPcomm.OnFinish() {
+                    new HTTPcomm(FormFillingOriginal.this, head, answers, errorAnswers, new HTTPcomm.OnFinish() {
                         @Override
                         public void onResult(String response) {
                             mWaitUploadDialog.dismiss();
                             if (response != null && response.length() > 0)
                                 showDialogSuccess();
                             else {
-                                FileMan f = new FileMan(FormFilling.this, "to_send_" + new Date().getTime());
+                                FileMan f = new FileMan(FormFillingOriginal.this, "to_send_" + new Date().getTime());
                                 f.saveDoc("head.json", head);
                                 f.saveDoc("answers.json", answers);
                                 f.saveDoc("error answers.json", errorAnswers);
@@ -474,45 +473,24 @@ public class FormFilling extends AppCompatActivity {
         final int err_id = q.optInt("id_error", 0);
         final String commonErrors = q.optString("common_id_errors");
 
-        switch (type){
-            case "yesno":
-                ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question, llQuestions, false);
-                break;
-            case "photo":
-                ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_photo, llQuestions, false);
-                //ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question_number, llQuestions, false);
-                break;
 
-        }
-        if (type.equals("text") || (type.equals("number"))){
-            ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question_number, llQuestions, false);
-        }
-        if (type.equals("text") || (type.equals("number")) || (type.equals("yesno"))){
+        if (type.equals("yesno")) {
+
+            ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question, llQuestions, false);
+            ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
+
+            llQuestions.addView(ll2);
+
             ll2.findViewById(R.id.btn_error).setVisibility(controller ? View.VISIBLE : View.GONE);
-            final ImageButton btnErr = ll2.findViewById(R.id.btn_error);
+
+            ImageButton btnErr = ll2.findViewById(R.id.btn_error);
             btnErr.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     dialog = new ErrorDialog();
-                    dialog.showDialog(FormFilling.this, q_id, commonErrors, errorCodesArray, errorAnswers, photosErr);
+                    dialog.showDialog(FormFillingOriginal.this, q_id, commonErrors, errorCodesArray, errorAnswers, photosErr);
                 }
             });
-        }
-
-        ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
-
-        ll2.findViewById(R.id.textPrefill).setVisibility(controller ? View.VISIBLE : View.GONE);
-
-        if (controller) {
-            prefillQuestion((TextView) ll2.findViewById(R.id.textPrefill), q_id);
-            countErrors((TextView) ll2.findViewById(R.id.textErrCount), q_id,ll2);
-        }
-
-
-
-        if (type.equals("yesno")) {
-
-            llQuestions.addView(ll2);
 
             final RadioGroup rg = (RadioGroup) ll2.findViewById(R.id.radioGroup);
             String answer;
@@ -540,7 +518,7 @@ public class FormFilling extends AppCompatActivity {
                                         putAnswer(q_id, g_id, type, "1", isLast);
                                     } else {
                                         rg.clearCheck();
-                                        Functions.toast(FormFilling.this, R.string.product_have_error);
+                                        Functions.toast(FormFillingOriginal.this, R.string.product_have_error);
                                     }
 
                                 } else {
@@ -554,12 +532,16 @@ public class FormFilling extends AppCompatActivity {
                     }
                 }
             });
-
-        }
-        if (type.equals("photo")) {
             if (controller) {
-              //  ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_photo, llQuestions, false);
-            //    ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
+                prefillQuestion((TextView) ll2.findViewById(R.id.textPrefill), q_id);
+                countErrors((TextView) ll2.findViewById(R.id.textErrCount), q_id,ll2);
+            }
+
+        } else if (type.equals("photo")) {
+            if (controller) {
+                ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_photo, llQuestions, false);
+                ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
+
                 llQuestions.addView(ll2);
 
                 Button makePhoto = (Button) findViewById(R.id.btn_make_photo);
@@ -577,7 +559,7 @@ public class FormFilling extends AppCompatActivity {
                                     .setName("photo_" + System.currentTimeMillis())
                                     .setImageFormat(Camera.IMAGE_JPEG)
                                     .setCompression(75)
-                                    .build(FormFilling.this);
+                                    .build(FormFillingOriginal.this);
                             camera.takePicture();
                         } catch (Exception e) {
                             Functions.err(e);
@@ -603,15 +585,27 @@ public class FormFilling extends AppCompatActivity {
                 }
             }
 
-        }
-        if (type.equals("number")) {
+        } else if (type.equals("number")) {
+            ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question_number, llQuestions, false);
+            ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
 
             llQuestions.addView(ll2);
 
-            final MyEditText editAnswer = (MyEditText) ll2.findViewById(R.id.editAnswer);
-            editAnswer.setInputType(InputType.TYPE_CLASS_NUMBER);
-            editAnswer.setText(getAnswer(q_id));
-            editAnswer.addTextChangedListener(new TextWatcher() {
+            ll2.findViewById(R.id.btn_error).setVisibility(controller ? View.VISIBLE : View.GONE);
+            ll2.findViewById(R.id.textPrefill).setVisibility(controller ? View.VISIBLE : View.GONE);
+            ImageButton btnErr = ll2.findViewById(R.id.btn_error);
+            btnErr.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog = new ErrorDialog();
+                    dialog.showDialog(FormFillingOriginal.this, q_id, commonErrors, errorCodesArray, errorAnswers, photosErr);
+                }
+            });
+
+
+            final MyEditText editNumber = (MyEditText) ll2.findViewById(R.id.editAnswer);
+            editNumber.setText(getAnswer(q_id));
+            editNumber.addTextChangedListener(new TextWatcher() {
 
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -640,10 +634,10 @@ public class FormFilling extends AppCompatActivity {
 
                         if ((newS > limitPlus) || (newS < limitMinus)) {
                             ((TextView) ll2.findViewById(R.id.text)).setTextColor(getResources().getColor(R.color.red, getResources().newTheme()));
-                            editAnswer.setTextColor(getResources().getColor(R.color.red, getResources().newTheme()));
+                            editNumber.setTextColor(getResources().getColor(R.color.red, getResources().newTheme()));
                         } else {
                             ((TextView) ll2.findViewById(R.id.text)).setTextColor(getResources().getColor(R.color.black, getResources().newTheme()));
-                            editAnswer.setTextColor(getResources().getColor(R.color.black, getResources().newTheme()));
+                            editNumber.setTextColor(getResources().getColor(R.color.black, getResources().newTheme()));
                         }
 
                         if (answers != null) {
@@ -655,15 +649,31 @@ public class FormFilling extends AppCompatActivity {
                 }
             });
 
-        }
-        if (q.optString("type").equals("text")) {
+            if (controller) {
+                prefillQuestion((TextView) ll2.findViewById(R.id.textPrefill), q_id);
+                countErrors((TextView) ll2.findViewById(R.id.textErrCount), q_id,ll2);
+            }
 
+        } else if (q.optString("type").equals("text")) {
+             ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question_text, llQuestions, false);
+            ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
             llQuestions.addView(ll2);
 
-            EditText editAnswer = (EditText) ll2.findViewById(R.id.editAnswer);
-            editAnswer.setInputType(InputType.TYPE_CLASS_TEXT);
-            editAnswer.setText(getAnswer(q_id));
-            editAnswer.addTextChangedListener(new TextWatcher() {
+            ll2.findViewById(R.id.btn_error).setVisibility(controller ? View.VISIBLE : View.GONE);
+            ll2.findViewById(R.id.textPrefill).setVisibility(controller ? View.VISIBLE : View.GONE);
+
+            ImageButton btnErr = ll2.findViewById(R.id.btn_error);
+            btnErr.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ErrorDialog dialog = new ErrorDialog();
+                    dialog.showDialog(FormFillingOriginal.this, q_id, commonErrors, errorCodesArray, errorAnswers, photosErr);
+                }
+            });
+
+            EditText editNumber = (EditText) ll2.findViewById(R.id.editText);
+            editNumber.setText(getAnswer(q_id));
+            editNumber.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 }
@@ -686,7 +696,10 @@ public class FormFilling extends AppCompatActivity {
 
 
         }
-
+        if (controller) {
+            prefillQuestion((TextView) ll2.findViewById(R.id.textPrefill), q_id);
+            countErrors((TextView) ll2.findViewById(R.id.textErrCount), q_id,ll2);
+        }
     }
 
     private void prefillQuestion(TextView text, int id_q) {
@@ -828,7 +841,7 @@ public class FormFilling extends AppCompatActivity {
                         }
                         if (!found)
                             photosErr.add(new Pair<String, Bitmap>(idQ + "_" + idErr, bitmap));
-                        Functions.toast(FormFilling.this, R.string.photo_save);
+                        Functions.toast(FormFillingOriginal.this, R.string.photo_save);
                     }
                 } catch (Exception e) {
                     Functions.err(e);
@@ -868,26 +881,26 @@ public class FormFilling extends AppCompatActivity {
 
 
     public void showDialogSuccess() {
-        new AlertDialog.Builder(FormFilling.this)
+        new AlertDialog.Builder(FormFillingOriginal.this)
                 .setTitle(R.string.success)
                 .setMessage(R.string.pdfCreated)
                 .setCancelable(false)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        FormFilling.this.finish();
+                        FormFillingOriginal.this.finish();
                     }
                 }).create().show();
 
     }
 
     public void showDialogError() {
-        new AlertDialog.Builder(FormFilling.this)
+        new AlertDialog.Builder(FormFillingOriginal.this)
                 .setTitle(R.string.error)
                 .setMessage(R.string.filesSaved)
                 .setCancelable(false)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        FormFilling.this.finish();
+                        FormFillingOriginal.this.finish();
                     }
                 }).create().show();
 

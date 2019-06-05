@@ -19,7 +19,13 @@
             android:layout_weight="0.1"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/dvacetDva" />
-
+        <TextView
+            android:id="@+id/textErrCount"
+            android:text="3x"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
         <ImageButton
             android:id="@+id/btn_error"
             android:layout_width="35dp"
@@ -28,19 +34,14 @@
             android:scaleType="fitCenter"
             android:src="@drawable/imagebutton_selector" />
 
-        <TextView
-            android:id="@+id/textErrCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="@dimen/dvacetDva" />
+
     </LinearLayout>
     <com.carpoint.boxscanner.main.MyEditText
-        android:id="@+id/editNumber"
+        android:id="@+id/editAnswer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="numberDecimal"
+
         android:textSize="@dimen/dvacetDva" />
     <TextView
         android:id="@+id/textPrefill"

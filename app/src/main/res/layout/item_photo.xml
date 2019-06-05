@@ -14,7 +14,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="@dimen/deset">
         <TextView
-            android:id="@+id/textphoto"
+            android:id="@+id/text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

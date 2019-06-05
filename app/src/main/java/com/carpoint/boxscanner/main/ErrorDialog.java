@@ -41,7 +41,7 @@ public class ErrorDialog {
     private LinearLayout llErrors;
     private Activity mActivity;
     private String actualLang = MainActivity.language, common_id_errors, searchString;
-    private int newErrG, newErrId, newErrPos, q_id;
+    private int  q_id;
     private ArrayList<Pair<String, Bitmap>> photosErr;
 
     public ErrorDialog() {
@@ -96,65 +96,8 @@ public class ErrorDialog {
             btnAdPhoto.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    try {
-                        int errID = (int) Math.round(Math.random() * Integer.MIN_VALUE);
-                        photoIdQuestion = q_id;
-                        photoIdError = errID;
-
-                        takePicture("Error photo_");
-
-                        putAnswer(errID, -1, "photo", "err_photo_" + q_id + "_" + errID, null);
-
-                        JSONObject group = new JSONObject();
-                        boolean newOne = true;
-
-                        for (int i = 0; i < errorCodes.length(); i++) {
-                            JSONObject obj = errorCodes.optJSONObject(i);
-
-                            if (obj.optInt("id_group")==-1) {
-                                group = obj;
-                                newOne = false;
-                                break;
-                            }
-                        }
-
-                        if(newOne){
-                            group.put("id_group", -1);
-                            group.put((MainActivity.language), activity.getString(R.string.another_errors));
-                        }
-
-                        final JSONObject newError = new JSONObject();
-
-                        newError.put("id_group", -1);
-                        newError.put("id_error", errID);
-                        newError.put("type", "photo");
-                        newError.put("photo_required", 1);
-
-                        if(newOne){
-                            JSONArray newErrorsArray = new JSONArray();
-                            newErrorsArray.put(newError);
-                            newError.put("position",1);
-                            newError.put("lang_cs", mActivity.getString(R.string.photoError)+" "+1);
-                            newError.put("lang_de", mActivity.getString(R.string.photoError)+" "+1);
-                            newError.put("lang_en", mActivity.getString(R.string.photoError)+" "+1);
-                            newError.put("lang_ro", mActivity.getString(R.string.photoError)+" "+1);
-                            group.put("errors", newErrorsArray);
-
-                            errorCodes.put(group);
-                        }else{
-                            JSONArray arr = group.optJSONArray("errors");
-                            newError.put("position",arr.length()+1);
-                            newError.put("lang_cs", mActivity.getString(R.string.photoError)+" "+(arr.length()+1));
-                            newError.put("lang_de", mActivity.getString(R.string.photoError)+" "+(arr.length()+1));
-                            newError.put("lang_en", mActivity.getString(R.string.photoError)+" "+(arr.length()+1));
-                            newError.put("lang_ro", mActivity.getString(R.string.photoError)+" "+(arr.length()+1));
-                            arr.put(newError);
-                        }
-
-                        refreshErros();
-                    } catch (Exception e) {
-                        Functions.err(e);
-                    }
+                    addError(mActivity.getString(R.string.photoError),true);
+                    takePicture("Error photo_");
                 }
             });
 
@@ -220,9 +163,7 @@ public class ErrorDialog {
 
                 for (int x = 0; x < errors.length(); x++) {
                     displayError(errors.optJSONObject(x), false);
-
                 }
-
             }
 
         } catch (Exception e) {
@@ -232,7 +173,6 @@ public class ErrorDialog {
 
 
     private void displayError(JSONObject group, boolean common) {
-
 
             final String type = group.optString("type");
             final boolean photoRequired = group.optString("photo_required", "").equals("1");
@@ -252,7 +192,6 @@ public class ErrorDialog {
             }
             else
                 ((TextView) ll.findViewById(R.id.text)).setText(group.optString("position", "") + ") " + group.optString(actualLang, ""));
-
 
             if (showCommon && common) llErrors.addView(ll);
             if (!common) llErrors.addView(ll);
@@ -383,7 +322,6 @@ public class ErrorDialog {
                         if ((errorAnswers.optJSONObject(i).optJSONArray("errors").optJSONObject(x).optInt("id_error")) == id_error) {
                             errFound = true;
                             errorAnswers.optJSONObject(i).optJSONArray("errors").put(x, tmp);
-
                         }
                     }
                     if (!errFound) errorAnswers.optJSONObject(i).optJSONArray("errors").put(tmp);
@@ -446,56 +384,7 @@ public class ErrorDialog {
         dialogBuilder.setPositiveButton(activity.getString(R.string.add_error), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String newErrorText = edt.getText().toString();
-                try {
-                    int errID = (int) Math.round(Math.random() * Integer.MIN_VALUE);
-
-                    JSONObject group = new JSONObject();
-                    boolean newOne = true;
-
-                    for (int i = 0; i < errorCodes.length(); i++) {
-                        JSONObject obj = errorCodes.optJSONObject(i);
-
-                        if (obj.optInt("id_group")==-1) {
-                            group = obj;
-                            newOne = false;
-                            break;
-                        }
-                    }
-
-                    if(newOne){
-                        group.put("id_group", -1);
-                        group.put((MainActivity.language), activity.getString(R.string.another_errors));
-                    }
-
-                    final JSONObject newError = new JSONObject();
-
-                    newError.put("id_group", -1);
-                    newError.put("id_error", errID);
-                    newError.put("lang_cs", newErrorText);
-                    newError.put("lang_de", newErrorText);
-                    newError.put("lang_en", newErrorText);
-                    newError.put("lang_ro", newErrorText);
-                    newError.put("type", "yesno");
-
-                    putAnswer(errID, -1, "yesno", "1", newErrorText);
-
-                    if(newOne){
-                        JSONArray newErrorsArray = new JSONArray();
-                        newErrorsArray.put(newError);
-                        newError.put("position",1);
-                        group.put("errors", newErrorsArray);
-
-                        errorCodes.put(group);
-                    }else{
-                        JSONArray arr = group.optJSONArray("errors");
-                        newError.put("position",arr.length()+1);
-                        arr.put(newError);
-                    }
-
-                    refreshErros();
-                } catch (JSONException e) {
-                    Functions.err(e);
-                }
+                addError(newErrorText,false);
 
             }
         });
@@ -512,7 +401,8 @@ public class ErrorDialog {
 
         try {
             int errID = (int) Math.round(Math.random() * Integer.MIN_VALUE);
-
+            photoIdQuestion = q_id;
+            photoIdError = errID;
             JSONObject group = new JSONObject();
             boolean newOne = true;
 
@@ -538,7 +428,7 @@ public class ErrorDialog {
 
 
             if (isPhoto){
-                putAnswer(errID, -1, "photo", "err_photo_" + q_id + "_" + errID, null);
+                putAnswer(errID, -1, "photo", "err_photo_" + q_id + "_" + photoIdError, null);
                 newError.put("type", "photo");
                 newError.put("photo_required", 1);
             }else{
@@ -557,10 +447,10 @@ public class ErrorDialog {
                 newError.put("position",1);
 
                 if (isPhoto){
-                    newError.put("lang_cs", mActivity.getString(R.string.photoError)+" "+1);
-                    newError.put("lang_de", mActivity.getString(R.string.photoError)+" "+1);
-                    newError.put("lang_en", mActivity.getString(R.string.photoError)+" "+1);
-                    newError.put("lang_ro", mActivity.getString(R.string.photoError)+" "+1);
+                    newError.put("lang_cs", text +" "+1);
+                    newError.put("lang_de", text +" "+1);
+                    newError.put("lang_en", text +" "+1);
+                    newError.put("lang_ro", text +" "+1);
                 }
                 group.put("errors", newErrorsArray);
                 errorCodes.put(group);
@@ -568,10 +458,10 @@ public class ErrorDialog {
                 JSONArray arr = group.optJSONArray("errors");
                 newError.put("position",arr.length()+1);
                 if (isPhoto){
-                    newError.put("lang_cs", mActivity.getString(R.string.photoError)+" "+(arr.length()+1));
-                    newError.put("lang_de", mActivity.getString(R.string.photoError)+" "+(arr.length()+1));
-                    newError.put("lang_en", mActivity.getString(R.string.photoError)+" "+(arr.length()+1));
-                    newError.put("lang_ro", mActivity.getString(R.string.photoError)+" "+(arr.length()+1));
+                    newError.put("lang_cs", text +" "+(arr.length()+1));
+                    newError.put("lang_de", text +" "+(arr.length()+1));
+                    newError.put("lang_en", text +" "+(arr.length()+1));
+                    newError.put("lang_ro", text +" "+(arr.length()+1));
 
                 }
                 arr.put(newError);
@@ -582,7 +472,6 @@ public class ErrorDialog {
             Functions.err(e);
         }
     }
-
 
     public Camera getCamera() {
 
