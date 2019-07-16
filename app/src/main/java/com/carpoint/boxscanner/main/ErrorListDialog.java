@@ -46,7 +46,7 @@ public class ErrorListDialog {
     private LinearLayout llProtocols, llHead;
     private Activity mActivity;
     private String actualLang = MainActivity.language;
-    private boolean showSign;
+    private boolean showSign,showall;
     private Bitmap bitmapSign;
     private SignatureView signatureView;
 
@@ -209,7 +209,52 @@ public class ErrorListDialog {
                 }
 
             }
+            if (!showall) {
+                Button bt = (Button) mActivity.getLayoutInflater().inflate(R.layout.item_button, llProtocols, false);
+                bt.setText(R.string.showAll);
+                bt.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            showall = true;
+                            final AlertDialog mWaitDownloadDialog = new AlertDialog.Builder(mActivity)
+                                    .setView(mActivity.getLayoutInflater().inflate(R.layout.wait_download, null))
+                                    .setNegativeButton(R.string.cancel,
+                                            new DialogInterface.OnClickListener() {
 
+                                                @Override
+                                                public void onClick(DialogInterface dialog,
+                                                                    int which) {
+                                                    if (dialog != null)
+                                                        dialog.cancel();
+                                                }
+                                            }).create();
+                            mWaitDownloadDialog.setCancelable(false);
+                            mWaitDownloadDialog.show();
+
+                            new HTTPcomm(mActivity, new HTTPcomm.OnFinish() {
+                                @Override
+                                public void onResult(String response) {
+                                    if (response != null) {
+                                        try {
+                                            mWaitDownloadDialog.dismiss();
+                                            JSONObject tmp = new JSONObject(response);
+                                            mProtocols = tmp.getJSONArray("protocols");
+
+                                            refreshProtocol("","");
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }, false , true);
+                        } catch (Exception e) {
+                            Functions.err(e);
+                        }
+                    }
+                });
+                llProtocols.addView(bt);
+            }
         } catch (Exception e) {
             Functions.err(e);
         }

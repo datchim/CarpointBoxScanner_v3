@@ -23,6 +23,7 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -54,20 +55,29 @@ import java.util.Date;
 public class FormFilling extends AppCompatActivity {
 
     public static final String MIME_TEXT_PLAIN = "text/plain";
-    public AlertDialog mWaitUploadDialog, mWaitDownloadDialog;
-    public ErrorDialog dialog;
+
+    private static final String tagIdPlan="id_plan", tagIdQuestion = "id_question", tagIdGroup = "id_group",  tagPlans = "plans", tagLogin = "LOGIN", tagControler = "is_controller", tagName = "name", tagDrawDate = "draw_date",
+            tagError = "ERROR", tagErrors = "errors",tagQuestionsGroups = "questions_groups", tagSerial = "serial", tagFullname = "fullname", tagAnswers = "answers", tagAnswer = "answer",
+            tagLastQ = "last_question", tagQuestions = "questions", tagType = "type", tagIdError = "id_error", tagCmnError = "common_id_errors", tagYesNo = "yesno", tagPhoto = "photo",
+            tagText = "text", tagNumber = "number", tagPhotoReq = "photo_required", tagPositiveAnswer = "1" , tagNegativeAnswer= "0", tagLocLat = "loc_lat", tagLocLng = "log_lng",
+            tagLimitPlus = "limit_plus", tagLimitMinus = "limit_minus";
+
+
+    private AlertDialog mWaitDialog;
+    private ErrorDialog dialog;
     private Camera camera;
 
     private String serialNumber, prefillFullName;
 
-    private LinearLayout llQuestions, ll2;
-    private int actualLayout = 0, layoutCount, tmpCount;
+    private LinearLayout llQuestions, ll2, llscroll,llserial2,llsign;
+    private int actualLayout = 0, layoutCount;
     private String actualLang = MainActivity.language;
 
     private JSONObject plans, selectedPlan, head, login;
     private JSONArray answers, errorCodesArray, errorAnswers, answersPrefill;
     private JSONArray questionGroups;
 
+    private Button btnBack, btnSend, btnNext, btnClear ;
 
     private SignatureView signatureView;
     private Bitmap bitmapSign, bitmap;
@@ -85,7 +95,19 @@ public class FormFilling extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.form_filling);
-        findViewById(R.id.btnBack).setVisibility(View.INVISIBLE);
+
+        btnBack = (Button) findViewById(R.id.btnBack);
+        btnSend = (Button) findViewById(R.id.btnSend);
+        btnNext = (Button) findViewById(R.id.btnNext);
+        btnClear = (Button) findViewById(R.id.btnClear);
+
+        llscroll = (LinearLayout) findViewById(R.id.llscroll);
+        llserial2 = (LinearLayout) findViewById(R.id.llserial2);
+        llsign = (LinearLayout) findViewById(R.id.llsign);
+
+        final EditText textViewSerial = (EditText) findViewById(R.id.editSerial);
+
+        btnBack.setVisibility(View.INVISIBLE);
 
         head = new JSONObject();
         answers = new JSONArray();
@@ -103,14 +125,14 @@ public class FormFilling extends AppCompatActivity {
             return;
         }
 
-        JSONObject login = plans.optJSONObject("LOGIN");
-        controller = login.optBoolean("is_controller");
+        JSONObject login = plans.optJSONObject(tagLogin);
+        controller = login.optBoolean(tagControler);
 
         //geting Types
         ArrayList<String> paletTypes = new ArrayList<>();
-        JSONArray tmp = plans.optJSONArray("plans");
+        JSONArray tmp = plans.optJSONArray(tagPlans);
         for (int i = 0; i < tmp.length(); i++) {
-            paletTypes.add(tmp.optJSONObject(i).optString("name")+" ("+tmp.optJSONObject(i).optString("draw_date")+")");
+            paletTypes.add(tmp.optJSONObject(i).optString(tagName)+" ("+tmp.optJSONObject(i).optString(tagDrawDate)+")");
         }
 
         //geting Error Codes and Array for error answers
@@ -119,39 +141,42 @@ public class FormFilling extends AppCompatActivity {
         try {
 
             errorCodesArray = new JSONArray();
-            errorCodesArray = plans.optJSONArray("ERROR");
+            errorCodesArray = plans.optJSONArray(tagError);
 
         } catch (Exception e) {
             Functions.toast(this, R.string.msg_no_error_codes);
             errorCodesArray = new JSONArray();
         }
 
-        final AutoCompleteTextView editType = (AutoCompleteTextView) findViewById(R.id.autocompletetextview);
+
+
+
+        final AutoCompleteTextView textVievType = (AutoCompleteTextView) findViewById(R.id.autocompletetextview);
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(this,
                         R.layout.item_auto, paletTypes);
-        editType.setAdapter(adapter);
-        editType.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        textVievType.setAdapter(adapter);
+        textVievType.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 if (hasFocus) {
-                    editType.showDropDown();
+                    textVievType.showDropDown();
                 }
             }
         });
-        editType.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        textVievType.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectedPlanIndex = position;
-                JSONArray tmp = plans.optJSONArray("plans");
-                editType.setText(tmp.optJSONObject(position).optString("name"));
+                JSONArray tmp = plans.optJSONArray(tagPlans);
+                textVievType.setText(tmp.optJSONObject(position).optString(tagName));
             }
         });
 
         llQuestions = (LinearLayout) findViewById(R.id.questions);
         signatureView = (SignatureView) findViewById(R.id.signature_view);
 
-        Button btnNext = (Button) findViewById(R.id.btnNext);
+        //    Button btnNext = (Button) findViewById(R.id.btnNext);
         btnNext.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -167,9 +192,8 @@ public class FormFilling extends AppCompatActivity {
 
                     }
                     if (actualLayout == 0) {
-                        String planName = ((AutoCompleteTextView) findViewById(R.id.autocompletetextview)).getText().toString();
-                        serialNumber = ((TextView) findViewById(R.id.editSerial)).getText().toString();
-
+                        String planName = textVievType.getText().toString();
+                        serialNumber = textViewSerial.getText().toString();
                         filled = planName.length() > 0 && serialNumber.length() > 0;
                         if (filled) {
                             if (selectedPlan != null) {
@@ -180,12 +204,12 @@ public class FormFilling extends AppCompatActivity {
                                 answersPrefill = new JSONArray();
                             }
 
-                            JSONArray tmp = plans.optJSONArray("plans");
+                            JSONArray tmp = plans.optJSONArray(tagPlans);
                             if(selectedPlanIndex > -1){
                                 selectedPlan = tmp.optJSONObject(selectedPlanIndex);
                             }else {
                                 for (int i = tmp.length()-1; i >-1; i--) {
-                                    if(tmp.optJSONObject(i).optString("name").equals(planName)){
+                                    if(tmp.optJSONObject(i).optString(tagName).equals(planName)){
                                         selectedPlan = tmp.optJSONObject(i);
                                         break;
                                     }
@@ -193,7 +217,7 @@ public class FormFilling extends AppCompatActivity {
                             }
 
                             if (selectedPlan != null) {
-                                questionGroups = selectedPlan.optJSONArray("questions_groups");
+                                questionGroups = selectedPlan.optJSONArray(tagQuestionsGroups);
                                 actualLayout = 0;
                                 layoutCount = questionGroups.length() + 2;
 
@@ -201,26 +225,13 @@ public class FormFilling extends AppCompatActivity {
 
 
                                     JSONObject params = new JSONObject();
-                                    params.put("name", planName);
-                                    params.put("serial", serialNumber);
+                                    params.put(tagName, planName);
+                                    params.put(tagSerial, serialNumber);
                                     if(selectedPlanIndex > -1){;
-                                        params.put("id_plan", tmp.optJSONObject(selectedPlanIndex).optInt("id_plan",-1));
+                                        params.put(tagIdPlan, tmp.optJSONObject(selectedPlanIndex).optInt(tagIdPlan,-1));
                                     }
+                                    waitDialog(true);
 
-                                    mWaitDownloadDialog = new AlertDialog.Builder(FormFilling.this)
-                                            .setView(getLayoutInflater().inflate(R.layout.wait_download, null))
-                                            .setNegativeButton(R.string.cancel,
-                                                    new DialogInterface.OnClickListener() {
-
-                                                        @Override
-                                                        public void onClick(DialogInterface dialog,
-                                                                            int which) {
-                                                            if (mWaitDownloadDialog != null)
-                                                                mWaitDownloadDialog.cancel();
-                                                        }
-                                                    }).create();
-                                    mWaitDownloadDialog.setCancelable(false);
-                                    mWaitDownloadDialog.show();
                                     new HTTPcomm(FormFilling.this, params, new HTTPcomm.OnFinish() {
 
                                         @Override
@@ -229,15 +240,15 @@ public class FormFilling extends AppCompatActivity {
                                                 try {
                                                     JSONObject tmp = new JSONObject(response);
                                                     answersPrefill = new JSONArray();
-                                                    prefillFullName = tmp.optString("fullname");
-                                                    if (tmp.has("answers")) {
-                                                        answersPrefill = tmp.optJSONArray("answers");
+                                                    prefillFullName = tmp.optString(tagFullname);
+                                                    if (tmp.has(tagAnswers)) {
+                                                        answersPrefill = tmp.optJSONArray(tagAnswers);
                                                         refresh();
                                                         Functions.toast(FormFilling.this, R.string.protocol_downloaded);
                                                     }
 
-                                                    if (mWaitDownloadDialog != null)
-                                                        mWaitDownloadDialog.dismiss();
+                                                    if (mWaitDialog != null)
+                                                        mWaitDialog.dismiss();
 
                                                 } catch (JSONException e) {
                                                     e.printStackTrace();
@@ -251,7 +262,7 @@ public class FormFilling extends AppCompatActivity {
                             }
                         }
                     } else if (actualLayout == layoutCount - 1) {
-                        filled = head.has("last_question");
+                        filled = head.has(tagLastQ);
                     } else {
                         filled = isPageFilled(questionGroups.getJSONObject(actualLayout - 1));
                     }
@@ -271,7 +282,7 @@ public class FormFilling extends AppCompatActivity {
         });
 
 
-        Button btnBack = (Button) findViewById(R.id.btnBack);
+        //    Button btnBack = (Button) findViewById(R.id.btnBack);
         btnBack.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -283,7 +294,7 @@ public class FormFilling extends AppCompatActivity {
         });
 
 
-        ((Button) findViewById(R.id.btnSend)).setOnClickListener(new View.OnClickListener() {
+        btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
@@ -294,32 +305,20 @@ public class FormFilling extends AppCompatActivity {
                         return;
                     }
 
-                    head.put("name", selectedPlan.optString("name"));
-                    head.put("serial", serialNumber);
-                    head.put("id_plan", selectedPlan.optString("id_plan"));
-                    Log.e("answers", answers.toString());
+                    head.put(tagName, selectedPlan.optString(tagName));
+                    head.put(tagSerial, serialNumber);
+                    head.put(tagIdPlan, selectedPlan.optString(tagIdPlan));
+                    Log.e(tagAnswers, answers.toString());
 
-                    mWaitUploadDialog = new AlertDialog.Builder(FormFilling.this)
-                            .setView(getLayoutInflater().inflate(R.layout.wait_upload, null))
-                            .setNegativeButton(R.string.cancel,
-                                    new DialogInterface.OnClickListener() {
+                    waitDialog(false);
 
-                                        @Override
-                                        public void onClick(DialogInterface dialog,
-                                                            int which) {
-                                            if (mWaitUploadDialog != null)
-                                                mWaitUploadDialog.cancel();
-                                        }
-                                    }).create();
-                    mWaitUploadDialog.setCancelable(false);
-                    mWaitUploadDialog.show();
 
                     new HTTPcomm(FormFilling.this, head, answers, errorAnswers, new HTTPcomm.OnFinish() {
                         @Override
                         public void onResult(String response) {
-                            mWaitUploadDialog.dismiss();
+                            mWaitDialog.dismiss();
                             if (response != null && response.length() > 0)
-                                showDialogSuccess();
+                                showResponseDialog(true);
                             else {
                                 FileMan f = new FileMan(FormFilling.this, "to_send_" + new Date().getTime());
                                 f.saveDoc("head.json", head);
@@ -332,7 +331,7 @@ public class FormFilling extends AppCompatActivity {
                                 for (int i = 0; i < photosErr.size(); i++) {
                                     f.saveBitmap("err_photo_" + photosErr.get(i).first + ".jpg", photosErr.get(i).second);
                                 }
-                                showDialogError();
+                                showResponseDialog(false);
                             }
                         }
                     }, photos, photosErr, bitmapSign);
@@ -343,7 +342,7 @@ public class FormFilling extends AppCompatActivity {
             }
         });
 
-        ((Button) findViewById(R.id.btnClear)).setOnClickListener(new View.OnClickListener() {
+        btnClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 signatureView.clearCanvas();
@@ -355,8 +354,8 @@ public class FormFilling extends AppCompatActivity {
             public void onLocationChanged(final Location location) {
                 try {
                     if (location != null && head != null) {
-                        head.put("loc_lat", location.getLatitude());
-                        head.put("loc_lng", location.getLongitude());
+                        head.put(tagLocLat, location.getLatitude());
+                        head.put(tagLocLng, location.getLongitude());
                         if (mLocationListener != null) {
                             LocationManager mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
                             mLocationManager.removeUpdates(mLocationListener);
@@ -388,8 +387,8 @@ public class FormFilling extends AppCompatActivity {
         Location last = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (last != null && head != null) {
             try {
-                head.put("loc_lat", last.getLatitude());
-                head.put("loc_lng", last.getLongitude());
+                head.put(tagLocLat, last.getLatitude());
+                head.put(tagLocLng, last.getLongitude());
             } catch (Exception e) {
                 Functions.err(e);
             }
@@ -401,12 +400,12 @@ public class FormFilling extends AppCompatActivity {
         try {
             llQuestions.removeAllViews();
 
-            findViewById(R.id.btnBack).setVisibility(actualLayout > 0 ? View.VISIBLE : View.INVISIBLE);
-            findViewById(R.id.btnSend).setVisibility(actualLayout == layoutCount ? View.VISIBLE : View.GONE);
-            findViewById(R.id.btnNext).setVisibility(actualLayout != layoutCount ? View.VISIBLE : View.GONE);
+            btnBack.setVisibility(actualLayout > 0 ? View.VISIBLE : View.INVISIBLE);
+            btnSend.setVisibility(actualLayout == layoutCount ? View.VISIBLE : View.GONE);
+            btnNext.setVisibility(actualLayout != layoutCount ? View.VISIBLE : View.GONE);
 
             if (actualLayout > 0 && actualLayout < questionGroups.length() + 1) {
-                findViewById(R.id.llscroll).setVisibility(View.VISIBLE);
+                llscroll.setVisibility(View.VISIBLE);
 
                 JSONObject group = questionGroups.optJSONObject(actualLayout - 1);
 
@@ -422,9 +421,9 @@ public class FormFilling extends AppCompatActivity {
                 }, 100);
             } else if (actualLayout == layoutCount - 1) {
                 if (controller) {
-                    findViewById(R.id.llscroll).setVisibility(View.VISIBLE);
+                    llscroll.setVisibility(View.VISIBLE);
 
-                    JSONObject last = selectedPlan.optJSONObject("last_question");
+                    JSONObject last = selectedPlan.optJSONObject(tagLastQ);
 
                     displayQuestion(last, true);
                 } else {
@@ -437,13 +436,12 @@ public class FormFilling extends AppCompatActivity {
                     }
                 }
 
-
             } else {
-                findViewById(R.id.llscroll).setVisibility(View.GONE);
+                llscroll.setVisibility(View.GONE);
             }
 
-            findViewById(R.id.llserial2).setVisibility(actualLayout == 0 ? View.VISIBLE : View.GONE);
-            findViewById(R.id.llsign).setVisibility(actualLayout == layoutCount ? View.VISIBLE : View.GONE);
+            llserial2.setVisibility(actualLayout == 0 ? View.VISIBLE : View.GONE);
+            llsign.setVisibility(actualLayout == layoutCount ? View.VISIBLE : View.GONE);
         } catch (Exception e) {
             Functions.err(e);
         }
@@ -451,12 +449,12 @@ public class FormFilling extends AppCompatActivity {
 
 
     public void displayGroup(JSONObject group) {
-        if (group.has("questions")) {
+        if (group.has(tagQuestions)) {
             LinearLayout ll = (LinearLayout) getLayoutInflater().inflate(R.layout.item_head, llQuestions, false);
             ((TextView) ll.findViewById(R.id.text)).setText(group.optString(actualLang, ""));
             llQuestions.addView(ll);
 
-            JSONArray questions = group.optJSONArray("questions");
+            JSONArray questions = group.optJSONArray(tagQuestions);
             for (int i = 0; i < questions.length(); i++) {
 
                 displayGroup(questions.optJSONObject(i));
@@ -468,26 +466,27 @@ public class FormFilling extends AppCompatActivity {
 
     public void displayQuestion(final JSONObject q, final boolean isLast) {
 
-        final int q_id = q.optInt("id_question", -1);
-        final int g_id = q.optInt("id_group", -1);
-        final String type = q.optString("type", "");
-        final int err_id = q.optInt("id_error", 0);
-        final String commonErrors = q.optString("common_id_errors");
+        final int q_id = q.optInt(tagIdQuestion, -1);
+        final int g_id = q.optInt(tagIdGroup, -1);
+        final String type = q.optString(tagType, "");
+        final int err_id = q.optInt(tagIdError, 0);
+        final String commonErrors = q.optString(tagCmnError);
 
+        ll2 = null;
         switch (type){
-            case "yesno":
+            case tagYesNo:
                 ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question, llQuestions, false);
                 break;
-            case "photo":
-                ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_photo, llQuestions, false);
-                //ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question_number, llQuestions, false);
+            case tagPhoto:
+                 ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_photo, llQuestions, false);
+                // nefunguje, je třeba stejného kódu - řádek 559,560
                 break;
 
         }
-        if (type.equals("text") || (type.equals("number"))){
-            ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question_number, llQuestions, false);
+        if (type.equals(tagText) || (type.equals(tagNumber))){
+            ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question_input, llQuestions, false);
         }
-        if (type.equals("text") || (type.equals("number")) || (type.equals("yesno"))){
+        if (type.equals(tagText) || (type.equals(tagNumber)) || (type.equals(tagYesNo))){
             ll2.findViewById(R.id.btn_error).setVisibility(controller ? View.VISIBLE : View.GONE);
             final ImageButton btnErr = ll2.findViewById(R.id.btn_error);
             btnErr.setOnClickListener(new View.OnClickListener() {
@@ -510,7 +509,7 @@ public class FormFilling extends AppCompatActivity {
 
 
 
-        if (type.equals("yesno")) {
+        if (type.equals(tagYesNo)) {
 
             llQuestions.addView(ll2);
 
@@ -521,9 +520,9 @@ public class FormFilling extends AppCompatActivity {
                 answer = getLastAnswer();
             } else answer = getAnswer(q_id);
 
-            if (answer.equals("1")) {
+            if (answer.equals(tagPositiveAnswer)) {
                 rg.check(R.id.rgYes);
-            } else if (answer.equals("0")) {
+            } else if (answer.equals(tagNegativeAnswer)) {
                 rg.check(R.id.rgNo);
             }
             rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -532,19 +531,19 @@ public class FormFilling extends AppCompatActivity {
                     try {
                         switch (checkedId) {
                             case R.id.rgNo:
-                                putAnswer(q_id, g_id, type, "0", isLast);
+                                putAnswer(q_id, g_id, type, tagNegativeAnswer, isLast);
                                 break;
                             case R.id.rgYes:
                                 if (isLast) {
                                     if (checkErrors()) {
-                                        putAnswer(q_id, g_id, type, "1", isLast);
+                                        putAnswer(q_id, g_id, type, tagPositiveAnswer, isLast);
                                     } else {
                                         rg.clearCheck();
                                         Functions.toast(FormFilling.this, R.string.product_have_error);
                                     }
 
                                 } else {
-                                    putAnswer(q_id, g_id, type, "1", isLast);
+                                    putAnswer(q_id, g_id, type, tagPositiveAnswer, isLast);
                                 }
 
                                 break;
@@ -556,10 +555,10 @@ public class FormFilling extends AppCompatActivity {
             });
 
         }
-        if (type.equals("photo")) {
+        if (type.equals(tagPhoto)) {
             if (controller) {
-              //  ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_photo, llQuestions, false);
-            //    ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
+                ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_photo, llQuestions, false);
+                ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
                 llQuestions.addView(ll2);
 
                 Button makePhoto = (Button) findViewById(R.id.btn_make_photo);
@@ -604,12 +603,15 @@ public class FormFilling extends AppCompatActivity {
             }
 
         }
-        if (type.equals("number")) {
-
+        if (type.equals(tagNumber) || (type.equals(tagText))) {
             llQuestions.addView(ll2);
-
             final MyEditText editAnswer = (MyEditText) ll2.findViewById(R.id.editAnswer);
-            editAnswer.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+            if (type.equals(tagNumber))
+                editAnswer.setInputType(InputType.TYPE_CLASS_NUMBER);
+            else
+                editAnswer.setInputType(InputType.TYPE_CLASS_TEXT);
+
             editAnswer.setText(getAnswer(q_id));
             editAnswer.addTextChangedListener(new TextWatcher() {
 
@@ -629,21 +631,23 @@ public class FormFilling extends AppCompatActivity {
                     int limitMinus = 0;
 
                     try {
-                        if (q.has("limit_plus")) {
-                            limitPlus = q.getInt("limit_plus");
-                        }
-                        if (q.has("limit_minus")) {
-                            limitMinus = q.getInt("limit_minus");
-                        }
+                        if (type.equals(tagNumber)){
+                            if (q.has(tagLimitPlus)) {
+                                limitPlus = q.getInt(tagLimitPlus);
+                            }
+                            if (q.has(tagLimitMinus)) {
+                                limitMinus = q.getInt(tagLimitMinus);
+                            }
 
-                        int newS = Integer.parseInt(s.toString());
+                            int newS = Integer.parseInt(s.toString());
 
-                        if ((newS > limitPlus) || (newS < limitMinus)) {
-                            ((TextView) ll2.findViewById(R.id.text)).setTextColor(getResources().getColor(R.color.red, getResources().newTheme()));
-                            editAnswer.setTextColor(getResources().getColor(R.color.red, getResources().newTheme()));
-                        } else {
-                            ((TextView) ll2.findViewById(R.id.text)).setTextColor(getResources().getColor(R.color.black, getResources().newTheme()));
-                            editAnswer.setTextColor(getResources().getColor(R.color.black, getResources().newTheme()));
+                            if ((newS > limitPlus) || (newS < limitMinus)) {
+                                ((TextView) ll2.findViewById(R.id.text)).setTextColor(getResources().getColor(R.color.red, getResources().newTheme()));
+                                editAnswer.setTextColor(getResources().getColor(R.color.red, getResources().newTheme()));
+                            } else {
+                                ((TextView) ll2.findViewById(R.id.text)).setTextColor(getResources().getColor(R.color.black, getResources().newTheme()));
+                                editAnswer.setTextColor(getResources().getColor(R.color.black, getResources().newTheme()));
+                            }
                         }
 
                         if (answers != null) {
@@ -654,36 +658,6 @@ public class FormFilling extends AppCompatActivity {
                     }
                 }
             });
-
-        }
-        if (q.optString("type").equals("text")) {
-
-            llQuestions.addView(ll2);
-
-            EditText editAnswer = (EditText) ll2.findViewById(R.id.editAnswer);
-            editAnswer.setInputType(InputType.TYPE_CLASS_TEXT);
-            editAnswer.setText(getAnswer(q_id));
-            editAnswer.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    try {
-                        if (answers != null) {
-                            putAnswer(q_id, g_id, type, s.toString(), isLast);
-                        }
-                    } catch (Exception e) {
-                        Functions.err(e);
-                    }
-                }
-            });
-
 
         }
 
@@ -693,11 +667,11 @@ public class FormFilling extends AppCompatActivity {
         try {
             if(answersPrefill != null){
                 for (int i = 0; i < answersPrefill.length(); i++) {
-                    if (answersPrefill.optJSONObject(i).optInt("id_question") == id_q) {
+                    if (answersPrefill.optJSONObject(i).optInt(tagIdQuestion) == id_q) {
 
-                        String answer = answersPrefill.optJSONObject(i).optString("answer");
-                        if (answersPrefill.optJSONObject(i).optString("type").equals("yesno")) {
-                            answer = answer.equals("1") ? getString(R.string.yes) : getString(R.string.no);
+                        String answer = answersPrefill.optJSONObject(i).optString(tagAnswer);
+                        if (answersPrefill.optJSONObject(i).optString(tagType).equals(tagYesNo)) {
+                            answer = answer.equals(tagPositiveAnswer) ? getString(R.string.yes) : getString(R.string.no);
                         }
                         if (answer.length() > 0) {
                             text.setVisibility(View.VISIBLE);
@@ -718,9 +692,9 @@ public class FormFilling extends AppCompatActivity {
             if(errorAnswers != null){
 
                 for (int i = 0; i < errorAnswers.length(); i++) {
-                    if (errorAnswers.optJSONObject(i).optInt("id_question") == id_q) {
-                        if (errorAnswers.optJSONObject(i).optJSONArray("errors").length()>0) {
-                            text.setText(errorAnswers.optJSONObject(i).optJSONArray("errors").length()+"x");
+                    if (errorAnswers.optJSONObject(i).optInt(tagIdQuestion) == id_q) {
+                        if (errorAnswers.optJSONObject(i).optJSONArray(tagErrors).length()>0) {
+                            text.setText(errorAnswers.optJSONObject(i).optJSONArray(tagErrors).length()+"x");
                             ll.setBackgroundResource(R.color.lightred);
                         }else{
                             text.setText("");
@@ -739,18 +713,18 @@ public class FormFilling extends AppCompatActivity {
     private boolean isPageFilled(JSONObject group) {
         boolean result = true;
         try {
-            if (group.has("questions")) {
-                JSONArray tmp = group.optJSONArray("questions");
+            if (group.has(tagQuestions)) {
+                JSONArray tmp = group.optJSONArray(tagQuestions);
                 for (int i = 0; i < tmp.length(); i++) {
                     result &= isPageFilled(tmp.optJSONObject(i));
                 }
             } else {
-                if (group.optString("type").equals("photo")) {
-                    Log.e("aa", getAnswer(group.optInt("id_question", -1)));
-                    result = getAnswer(group.optInt("id_question", -1)).length() > 0
-                            || group.optInt("photo_required", -1) == 0;
+                if (group.optString(tagType).equals(tagPhoto)) {
+                    Log.e("aa", getAnswer(group.optInt(tagIdQuestion, -1)));
+                    result = getAnswer(group.optInt(tagIdQuestion, -1)).length() > 0
+                            || group.optInt(tagPhotoReq, -1) == 0;
                 } else {
-                    result = getAnswer(group.optInt("id_question", -1)).length() > 0;
+                    result = getAnswer(group.optInt(tagIdQuestion, -1)).length() > 0;
                 }
             }
         } catch (Exception e) {
@@ -763,8 +737,8 @@ public class FormFilling extends AppCompatActivity {
         try {
 
             for (int i = 0; i < answers.length(); i++) {
-                if (answers.optJSONObject(i).optInt("id_question") == id_q)
-                    return answers.optJSONObject(i).optString("answer");
+                if (answers.optJSONObject(i).optInt(tagIdQuestion) == id_q)
+                    return answers.optJSONObject(i).optString(tagAnswer);
             }
         } catch (Exception e) {
             Functions.err(e);
@@ -774,9 +748,9 @@ public class FormFilling extends AppCompatActivity {
 
     private String getLastAnswer() {
         try {
-            JSONObject tmp = head.optJSONObject("last_question");
+            JSONObject tmp = head.optJSONObject(tagLastQ);
             if (tmp != null)
-                return tmp.optString("answer");
+                return tmp.optString(tagAnswer);
 
         } catch (Exception e) {
             Functions.err(e);
@@ -805,7 +779,7 @@ public class FormFilling extends AppCompatActivity {
                     }
                     if (!found)
                         photos.add(new Pair<Integer, Bitmap>(photo_id_q, bitmap));
-                    putAnswer(photo_id_q, photo_id_g, "photo", "photo_" + photo_id_q, false);
+                    putAnswer(photo_id_q, photo_id_g, tagPhoto, "photo_" + photo_id_q, false);
                 }
             }
         }
@@ -841,18 +815,18 @@ public class FormFilling extends AppCompatActivity {
     private void putAnswer(int id_question, int id_group, String type, String answer, boolean isLast) {
         try {
             JSONObject tmp = new JSONObject();
-            tmp.put("id_question", id_question);
+            tmp.put(tagIdQuestion, id_question);
             if (id_group != -1)
-                tmp.put("id_group", id_group);
-            tmp.put("type", type);
-            tmp.put("answer", answer);
+                tmp.put(tagIdGroup, id_group);
+            tmp.put(tagType, type);
+            tmp.put(tagAnswer, answer);
 
             if (isLast) {
-                head.put("last_question", tmp);
+                head.put(tagLastQ, tmp);
             } else {
                 boolean found = false;
                 for (int i = 0; i < answers.length(); i++) {
-                    if (answers.optJSONObject(i).optInt("id_question") == id_question) {
+                    if (answers.optJSONObject(i).optInt(tagIdQuestion) == id_question) {
                         found = true;
                         answers.put(i, tmp);
                         break;
@@ -866,11 +840,18 @@ public class FormFilling extends AppCompatActivity {
         }
     }
 
-
-    public void showDialogSuccess() {
+    private void showResponseDialog(boolean success) {
+        String title,message;
+        if (success) {
+            title = this.getApplicationContext().getString(R.string.success);
+            message = this.getApplicationContext().getString(R.string.pdfCreated);
+        }else {
+            title = this.getApplicationContext().getString(R.string.error);
+            message = this.getApplicationContext().getString(R.string.filesSaved);
+        }
         new AlertDialog.Builder(FormFilling.this)
-                .setTitle(R.string.success)
-                .setMessage(R.string.pdfCreated)
+                .setTitle(title)
+                .setMessage(message)
                 .setCancelable(false)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -880,32 +861,45 @@ public class FormFilling extends AppCompatActivity {
 
     }
 
-    public void showDialogError() {
-        new AlertDialog.Builder(FormFilling.this)
-                .setTitle(R.string.error)
-                .setMessage(R.string.filesSaved)
-                .setCancelable(false)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        FormFilling.this.finish();
-                    }
-                }).create().show();
+    private void waitDialog(boolean download){
+        String message;
+        if (download) {
+            message = this.getApplicationContext().getString(R.string.waitDownload);
+        }else {
+            message = this.getApplicationContext().getString(R.string.waitUpload);
+        }
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(FormFilling.this);
+        LayoutInflater inflater = FormFilling.this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.dialog_wait, null);
+        TextView textView = dialogView.findViewById(R.id.message);
+        textView.setText(message);
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (mWaitDialog != null)
+                    mWaitDialog.cancel();
+            }
+        });
+        mWaitDialog = dialogBuilder.create();
+        mWaitDialog.show();
 
     }
+
 
     private boolean checkErrors() {
         JSONArray errArray;
         try {
             for (int i = 0; i < errorAnswers.length(); i++) {
 
-                errArray = errorAnswers.optJSONObject(i).optJSONArray("errors");
+                errArray = errorAnswers.optJSONObject(i).optJSONArray(tagErrors);
 
                 for (int x = 0; x < errArray.length(); x++) {
 
                     errArray.optJSONObject(x);
-                    String answer = errArray.optJSONObject(x).optString("answer");
+                    int answer = errArray.optJSONObject(x).optInt(tagAnswer);
 
-                    if (!answer.equals("0")) return false;
+                    if (answer!=0) return false;
                 }
             }
         } catch (Exception e) {
@@ -1024,3 +1018,4 @@ public class FormFilling extends AppCompatActivity {
         }
     }
 }
+

@@ -36,48 +36,59 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
     private OnFinish onFinish;
     private OnFinishBitmap onFinishBitmap;
     private String  endUrl;
-
+    private boolean showAll;
 
     //getErroListProtocol; getQuestions
     public HTTPcomm(Context context, OnFinish onFinish, boolean isQuestions ) {
         mContext = context;
-        this.execute();
         this.onFinish = onFinish;
         if (isQuestions)
             endUrl ="getQuestions";
         else
             endUrl ="getProtoErrorList";
+        this.execute();
+
+    }
+    public HTTPcomm(Context context, OnFinish onFinish, boolean isQuestions , boolean showAll) {
+        mContext = context;
+        this.onFinish = onFinish;
+        this.showAll = showAll;
+        if (isQuestions)
+            endUrl ="getQuestions";
+        else
+            endUrl ="getProtoErrorList";
+        this.execute();
 
     }
 
     //getPhoto
     public HTTPcomm(Context context,int id_protocol, String photoName, OnFinishBitmap onFinish ) {
         mContext = context;
-        this.execute(id_protocol,photoName);
         this.onFinishBitmap = onFinish;
         this.endUrl = "getPhoto";
+        this.execute(id_protocol,photoName);
 
     }
     //getProtocol
     public HTTPcomm(Context context, JSONObject product, OnFinish onFinish ) {
         mContext = context;
-        this.execute(product);
         this.onFinish = onFinish;
         this.endUrl = "getProtocol";
+        this.execute(product);
     }
     //resolve
     public HTTPcomm(Context context, JSONArray ids, Bitmap bitmapSign,OnFinish onFinish ) {
         mContext = context;
-        this.execute(ids,bitmapSign);
         this.onFinish = onFinish;
         this.endUrl = "resolveError";
+        this.execute(ids,bitmapSign);
     }
     //sendProtocol
     public HTTPcomm(Context context, JSONObject head, JSONArray answers, JSONArray errorAnswers, OnFinish onFinish, ArrayList<Pair<Integer, Bitmap>> photos, ArrayList<Pair<String, Bitmap>> photosError, Bitmap sign) {
         mContext = context;
-        this.execute(head,answers,errorAnswers,photos,photosError,sign);
         this.onFinish = onFinish;
         this.endUrl = "sendProtocol";
+        this.execute(head,answers,errorAnswers,photos,photosError,sign);
     }
 
     @Override
@@ -118,6 +129,8 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
             boolean isPhoto = false;
             switch (endUrl){
                 case "getProtoErrorList":
+                    if(showAll)
+                        customer.put("showall",1);
                     writeText(os, "login", customer.toString());
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
                     break;
@@ -265,7 +278,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
     protected void onPostExecute(Object result) {
         super.onPostExecute(result);
 
-            if (endUrl.equals("getProtoErrorList") || endUrl.equals("getProtocol")|| endUrl.equals("resolveError")){
+            if (endUrl.equals("getProtoErrorList")|| endUrl.equals("getProtocol")|| endUrl.equals("resolveError")){
                 try {
                     if (onFinish != null)
                         onFinish.onResult((String)result);

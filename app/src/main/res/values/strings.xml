@@ -128,6 +128,7 @@
     <string name="noScenary">Scenary was not found</string>
     <string name="machen_sie_ein_foto">Create photo</string>
     <string name="showPhoto">Show photo</string>
+    <string name="showAll">Show all</string>
     <string name="photoError">Photo - error</string>
     <string name="add_error">Add error</string>
     <string name="msg_no_error_codes">No error codes found</string>

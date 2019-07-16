@@ -36,6 +36,8 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="text"
+                    android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                    android:textSize="@dimen/dvacet"
                     android:hint="@string/quickSearch" />
 
                 <LinearLayout

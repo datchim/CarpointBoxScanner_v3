@@ -78,4 +78,5 @@
     <string name="errors">fehler!</string>
     <string name="filled">gefüllt</string>
     <string name="quickSearch">Schnellsuche (B3)</string>
+    <string name="showAll">Zeige alles</string>
 </resources>

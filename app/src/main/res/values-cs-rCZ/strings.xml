@@ -79,4 +79,5 @@
     <string name="errors">chyb!</string>
     <string name="filled">vyplnil</string>
     <string name="quickSearch">Rychlé hledání (B3)</string>
+    <string name="showAll">Zobrazit vše</string>
 </resources>
