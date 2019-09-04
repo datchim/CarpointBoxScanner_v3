@@ -16,15 +16,12 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
 import com.carpoint.boxscanner.MainActivity;
 import com.carpoint.boxscanner.R;
 import com.mindorks.paracamera.Camera;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,10 +30,10 @@ import java.util.ArrayList;
 
 public class ErrorDialog {
 
-    public Camera camera;
-    public int photoIdQuestion, photoIdError;
+    private Camera camera;
+    public int photoIdQuestion, photoIdError,id_pr_err = 0;
+    public boolean isDialog = false;
     private JSONArray errorCodes, errorAnswers;
-    private String commonErr[];
     private Dialog dialog;
     private LinearLayout llErrors;
     private Activity mActivity;
@@ -44,23 +41,36 @@ public class ErrorDialog {
     private int  q_id;
     private ArrayList<Pair<String, Bitmap>> photosErr;
 
-    public ErrorDialog() {
+    public ErrorDialog(final Activity activity, int question_id, JSONArray error_answers,JSONArray passedErrors) {
+        mActivity = activity;
+        q_id = question_id;
+        errorAnswers = error_answers;
+        dialog = new Dialog(activity);
+        errorCodes = passedErrors;
     }
 
-    public void showDialog(final Activity activity, int question_id, String common_errors, JSONArray passedErrors,
-                           JSONArray error_answers, ArrayList<Pair<String, Bitmap>> errorPhotos) {
-        try {
-            mActivity = activity;
-            q_id = question_id;
+    public ErrorDialog(final Activity activity, int question_id, String common_errors, JSONArray passedErrors,
+                       JSONArray error_answers, ArrayList<Pair<String, Bitmap>> errorPhotos) {
 
-            common_id_errors = common_errors;
-            errorAnswers = error_answers;
-            dialog = new Dialog(activity);
-            errorCodes = new JSONArray();
-            errorCodes = passedErrors;
-            photosErr = errorPhotos;
+        mActivity = activity;
+        q_id = question_id;
+        common_id_errors = common_errors;
+        errorAnswers = error_answers;
+        dialog = new Dialog(activity);
+        errorCodes = new JSONArray();
+        errorCodes = passedErrors;
+        photosErr = errorPhotos;
+
+
+    }
+
+    /////////////////////////////////////////INIT///////////////////////////////////////////////
+
+    public void showDialog() {
+        try {
+            isDialog = true ;
             searchString = "";
-            dialog.setCancelable(false);
+            dialog.setCancelable(true);
             dialog.setContentView(R.layout.dilalog_errors);
 
             Button btnOK = dialog.findViewById(R.id.btnOK);
@@ -88,7 +98,7 @@ public class ErrorDialog {
                 @Override
                 public void onClick(View v) {
 
-                    addNewErrorDialog(activity);
+                    addNewErrorDialog(mActivity);
 
                 }
             });
@@ -96,8 +106,8 @@ public class ErrorDialog {
             btnAdPhoto.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    addError(mActivity.getString(R.string.photoError),true);
-                    takePicture("Error photo_");
+                    addError(mActivity.getString(R.string.photoError),true,0,false);
+                    takePicture("err_photo_");
                 }
             });
 
@@ -126,6 +136,8 @@ public class ErrorDialog {
 
     }
 
+    /////////////////////////////////////////DISPLAYING///////////////////////////////////////////////
+
     private void refreshErros() {
         try {
             llErrors.removeAllViews();
@@ -149,7 +161,6 @@ public class ErrorDialog {
 
             for (int i = 0; i < errorCodes.length(); i++) {
                 JSONObject obj = errorCodes.optJSONObject(i);
-                Log.e("obj", obj.toString());
 
                 if (searchString.length() > 0 && !searchString.toUpperCase().contains(obj.optString("code", "").toUpperCase())) {
                     continue;
@@ -171,117 +182,123 @@ public class ErrorDialog {
         }
     }
 
-
     private void displayError(JSONObject group, boolean common) {
 
-            final String type = group.optString("type");
-            final boolean photoRequired = group.optString("photo_required", "").equals("1");
-            Log.e("type: ", type);
-            boolean showCommon =false;
-            final int errID = group.optInt("id_error", -1);
-            final int errG = group.optInt("id_group", -1);
+        final boolean photoRequired = group.optString("photo_required", "").equals("1");
 
-            if (searchString.length() > 1 && !searchString.contains(group.optString("position", "")) && !common) {
+        boolean showCommon =false;
+        final int errID = group.optInt("id_error", -1);
+        final int errG = group.optInt("id_group", -1);
+
+        if (group.has("id_question")) {
+            if (group.optInt("id_question")!=q_id)
                 return;
-            }
+        }
 
-            LinearLayout ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_error_photo, llErrors, false);
-            if ((common_id_errors.contains(group.optString("id_error"))) && (common)){
-                showCommon = true;
-                ((TextView) ll.findViewById(R.id.text)).setText(group.optString(actualLang, ""));
-            }
-            else
-                ((TextView) ll.findViewById(R.id.text)).setText(group.optString("position", "") + ") " + group.optString(actualLang, ""));
+        if (searchString.length() > 1 && !searchString.contains(group.optString("position", "")) && !common) {
+            return;
+        }
 
-            if (showCommon && common) llErrors.addView(ll);
-            if (!common) llErrors.addView(ll);
+        LinearLayout ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_error_photo, llErrors, false);
+        if ((common_id_errors.contains(group.optString("id_error"))) && (common)){
+            showCommon = true;
+            ((TextView) ll.findViewById(R.id.text)).setText(group.optString(actualLang, ""));
+        }else if(group.optString("type","").equals("photo")&&group.optString(actualLang, "").startsWith("err_photo")){
 
-            final CheckBox chk = (CheckBox) ll.findViewById(R.id.checkbox);
-            final ImageButton btnMakePhoto = ll.findViewById(R.id.btn_make_photo);
+            ((TextView) ll.findViewById(R.id.text)).setText(mActivity.getString(R.string.photoError)+" "+group.optInt("position",1));
+        }else{
+            ((TextView) ll.findViewById(R.id.text)).setText(group.optString(actualLang, ""));
+        }
 
+        if(group.optInt("resolved_by", -1) > -1){
+            ll.setBackgroundResource(R.color.lightgreen);
+            ((TextView) ll.findViewById(R.id.text)).append("\n"+mActivity.getString(R.string.repaired));
+        }
 
-            btnMakePhoto.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        takePicture("err_photo_");
-                        chk.setChecked(true);
-                        putAnswer(errID, errG, "photo", "err_photo_" + q_id + "_" + errID, null);
-                        refreshErros();
-                    } catch (Exception e) {
-                        Functions.err(e);
-                    }
+        if (showCommon && common) llErrors.addView(ll);
+        if (!common) llErrors.addView(ll);
+
+        final CheckBox chk = (CheckBox) ll.findViewById(R.id.checkbox);
+        final Button btnMakePhoto = ll.findViewById(R.id.btn_make_photo);
+
+        if (group.optInt("is_virtual")==1){
+            chk.setVisibility(View.GONE);
+        }
+
+        btnMakePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    photoIdQuestion = q_id;
+                    photoIdError = errID;
+                    takePicture("err_photo_");
+                    chk.setChecked(true);
+
+                    putAnswer(errID, errG, "photo", "err_photo_" + q_id + "_" + errID, null,0);
+                    refreshErros();
+                } catch (Exception e) {
+                    Functions.err(e);
                 }
-            });
+            }
+        });
 
-            String answer = getAnswer(errID);
+        String answer = getAnswer(errID,q_id);
 
-            if (answer.equals("1")||answer.contains("err_photo")) {
-                chk.setChecked(true);
+        if (answer.equals("1")||answer.contains("err_photo")) {
+            chk.setChecked(true);
+            btnMakePhoto.setVisibility(View.GONE);
+        }else{
+
+            if (photoRequired) {
+                chk.setVisibility(View.GONE);
+
+            } else {
                 btnMakePhoto.setVisibility(View.GONE);
-            }else{
+            }
+        }
 
-                if (photoRequired) {
-                    chk.setVisibility(View.GONE);
+        chk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
 
-                } else {
-                    btnMakePhoto.setVisibility(View.GONE);
+                    if (((CheckBox) v).isChecked()) {
+                        putAnswer(errID, errG, "yesno", "1", null,0);
+                    } else {
+
+                        removeError(errID, q_id);
+
+                        String photoName = q_id + "_" + errID;
+                        removeErrorPhoto(photoName);
+                        if(photoRequired){
+                            chk.setVisibility(View.GONE);
+                            btnMakePhoto.setVisibility(View.VISIBLE);
+                        }
+                    }
+                    refreshErros();
+                } catch (Exception e) {
+                    Functions.err(e);
                 }
             }
-
-            chk.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-
-                        if (((CheckBox) v).isChecked()) {
-                            putAnswer(errID, errG, "yesno", "1", null);
-                        } else {
-                            JSONArray errArray = new JSONArray();
-                            boolean breakit = false;
-                            for (int i = 0; i < errorAnswers.length(); i++) {
-                                if (errorAnswers.optJSONObject(i).optInt("id_question") == q_id)
-                                    errArray = errorAnswers.optJSONObject(i).optJSONArray("errors");
-                                for (int x = 0; x < errArray.length(); x++) {
-                                    errArray.optJSONObject(x);
-                                    if ((errArray.optJSONObject(x).optInt("id_error") == errID)) {
-                                        errArray.remove(x);
-                                        breakit = true;
-                                        break;
-                                    }
-                                }
-                                if(breakit)
-                                    break;
-                            }
-
-                            String photoName = q_id + "_" + errID;
-                            removeErrorPhoto(photoName);
-                            if(photoRequired){
-                                chk.setVisibility(View.GONE);
-                                btnMakePhoto.setVisibility(View.VISIBLE);
-                            }
-                        }
-                        refreshErros();
-                    } catch (Exception e) {
-                        Functions.err(e);
-                    }
-                }
-            });
+        });
 
     }
 
-    private String getAnswer(int id_err) {
+    /////////////////////////////////////////INNER LOGIC///////////////////////////////////////////////
+
+    public String getAnswer(int id_err, int q_id) {
         JSONArray errArray = new JSONArray();
         try {
             for (int i = 0; i < errorAnswers.length(); i++) {
                 if (errorAnswers.optJSONObject(i).optInt("id_question") == q_id)
                     errArray = errorAnswers.optJSONObject(i).optJSONArray("errors");
+
                 for (int x = 0; x < errArray.length(); x++) {
                     errArray.optJSONObject(x);
                     if ((errArray.optJSONObject(x).optInt("id_error") == id_err)) {
                         String answer = errArray.optJSONObject(x).optString("answer");
+                        String manualText = errArray.optJSONObject(x).optString("manual_text");
                         return answer;
-
                     }
                 }
             }
@@ -291,17 +308,26 @@ public class ErrorDialog {
         return "";
     }
 
-    private void putAnswer(int id_error, int id_group, String type, String answer, String manual) {
+    public void putAnswer(int id_error, int id_group, String type, String answer, String manual, int virtual) {
+        putAnswer(id_error, id_group, type, answer, manual, virtual, null);
+    }
+    public void putAnswer(int id_error, int id_group, String type, String answer, String manual, int virtual, String resolved_by) {
         try {
             JSONObject tmp = new JSONObject();
             tmp.put("id_error", id_error);
+            if (id_pr_err!=0)
+                tmp.put("id_pr_err", id_pr_err);
             if (id_group != -1)
                 tmp.put("id_group", id_group);
             tmp.put("type", type);
+            tmp.put("is_virtual", virtual);
             tmp.put("answer", answer);
+            tmp.put("id_question",q_id);
             if (manual != null) {
                 tmp.put("manual_text", manual);
             }
+            if(resolved_by != null)
+                tmp.put("resolved_by", resolved_by);
 
             JSONObject err = new JSONObject();
             err.put("id_question", q_id);
@@ -309,7 +335,6 @@ public class ErrorDialog {
             JSONArray errorsArray = new JSONArray();
             errorsArray.put(tmp);
             err.put("errors", errorsArray);
-
 
             boolean Qfound = false;
             boolean errFound = false;
@@ -325,82 +350,27 @@ public class ErrorDialog {
                         }
                     }
                     if (!errFound) errorAnswers.optJSONObject(i).optJSONArray("errors").put(tmp);
-
                 }
             }
             if (!Qfound)
                 errorAnswers.put(err);
-            Log.e("Errors Answers", errorAnswers.toString());
 
         } catch (Exception e) {
             Functions.err(e);
         }
     }
 
-    private void removeErrorPhoto(String name) {
-        for (int i = 0; i < photosErr.size(); i++) {
-            if (photosErr.get(i).first.equals(name)) {
-                photosErr.remove(i);
-                Log.e("Deleted photo", photosErr.toString());
-            }
-
-        }
+    public void addError(String text, boolean isPhoto, int downlError, boolean isVirtual) {
+        addError(text,isPhoto,downlError,isVirtual,null);
     }
 
-    private void getScrollHandler() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ScrollView scrollView =
-                        ((ScrollView) dialog.findViewById(R.id.ScrollView));
-                if (scrollView != null) scrollView.smoothScrollTo(0, 0);
-            }
-        }, 100);
-    }
-
-    private void takePicture(String name){
-        camera = new Camera.Builder()
-                .resetToCorrectOrientation(true)
-                .setTakePhotoRequestCode(2)
-                .setDirectory("BoxScannerPics")
-                .setName(name + System.currentTimeMillis())
-                .setImageFormat(Camera.IMAGE_JPEG)
-                .setCompression(75)
-                .build(mActivity);
-        try {
-            camera.takePicture();
-        } catch (IllegalAccessException e) {
-            Functions.err(e);
-        }
-    }
-
-    public void addNewErrorDialog(final Activity activity) {
-        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
-        LayoutInflater inflater = activity.getLayoutInflater();
-        final View dialogView = inflater.inflate(R.layout.add_new_error_dialog, null);
-        dialogBuilder.setView(dialogView);
-        dialogBuilder.setTitle(activity.getString(R.string.btn_add_error));
-        final EditText edt = (EditText) dialogView.findViewById(R.id.edit1);
-        dialogBuilder.setPositiveButton(activity.getString(R.string.add_error), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                String newErrorText = edt.getText().toString();
-                addError(newErrorText,false);
-
-            }
-        });
-        dialogBuilder.setNegativeButton((activity.getString(R.string.cancel)), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-
-            }
-        });
-        AlertDialog b = dialogBuilder.create();
-        b.show();
-    }
-
-    public void addError(String text, boolean isPhoto){
+    public void addError(String text, boolean isPhoto, int downlError, boolean isVirtual, String resolved_by){
 
         try {
+            Log.e ("error codes", errorCodes.toString());
             int errID = (int) Math.round(Math.random() * Integer.MIN_VALUE);
+            if (downlError!=0) errID=downlError;
+            if (downlError==-2) errID=-2;
             photoIdQuestion = q_id;
             photoIdError = errID;
             JSONObject group = new JSONObject();
@@ -425,21 +395,24 @@ public class ErrorDialog {
 
             newError.put("id_group", -1);
             newError.put("id_error", errID);
+            newError.put("id_question", q_id);
+            if(resolved_by != null)
+                newError.put("resolved_by", resolved_by);
 
 
             if (isPhoto){
-                putAnswer(errID, -1, "photo", "err_photo_" + q_id + "_" + photoIdError, null);
+                putAnswer(errID, -1, "photo", "err_photo_" + q_id + "_" + photoIdError, null,0,resolved_by);
                 newError.put("type", "photo");
                 newError.put("photo_required", 1);
             }else{
-                putAnswer(errID, -1, "yesno", "1", text);
+                putAnswer(errID, -1, "yesno", "1", text,isVirtual?1:0,resolved_by);
+                newError.put("is_virtual", isVirtual?1:0);
                 newError.put("type", "yesno");
                 newError.put("lang_cs", text);
                 newError.put("lang_de", text);
                 newError.put("lang_en", text);
                 newError.put("lang_ro", text);
             }
-
 
             if(newOne){
                 JSONArray newErrorsArray = new JSONArray();
@@ -455,6 +428,13 @@ public class ErrorDialog {
                 group.put("errors", newErrorsArray);
                 errorCodes.put(group);
             }else{
+                for (int i = 0; i < errorCodes.length(); i++) {
+                    JSONObject obj = errorCodes.optJSONObject(i);
+                    JSONArray errors = obj.optJSONArray("errors");
+                    for (int x =0; x<errors.length(); x++){
+                        if (errors.optJSONObject(x).optString(actualLang).equals(text)) return;
+                    }
+                }
                 JSONArray arr = group.optJSONArray("errors");
                 newError.put("position",arr.length()+1);
                 if (isPhoto){
@@ -467,15 +447,108 @@ public class ErrorDialog {
                 arr.put(newError);
             }
 
-            refreshErros();
+            if (isDialog)  refreshErros();
         } catch (JSONException e) {
             Functions.err(e);
         }
     }
 
-    public Camera getCamera() {
+    public void removeError(int errID, int q_id){
+        JSONArray errArray = new JSONArray();
+        boolean breakit = false;
+        for (int i = 0; i < errorAnswers.length(); i++) {
+            if (errorAnswers.optJSONObject(i).optInt("id_question") == q_id)
+                errArray = errorAnswers.optJSONObject(i).optJSONArray("errors");
+            for (int x = 0; x < errArray.length(); x++) {
+                errArray.optJSONObject(x);
+                if ((errArray.optJSONObject(x).optInt("id_error") == errID)) {
+                    errArray.remove(x);
+                    breakit = true;
+                    break;
+                }
+            }
+            if(breakit)
+                break;
+        }
+    }
 
+    public void removeVirtualCode(int q_id){
+        for (int i = 0; i < errorCodes.length(); i++) {
+            JSONObject obj = errorCodes.optJSONObject(i);
+            JSONArray errors = obj.optJSONArray("errors");
+            for (int x =0; x<errors.length(); x++){
+                if (errors.optJSONObject(x).optInt("id_error")==-2 && q_id==errors.optJSONObject(x).optInt("id_question")) {
+                    errorCodes.optJSONObject(i).optJSONArray("errors").remove(x);
+                }
+            }
+        }
+
+    }
+
+    private void removeErrorPhoto(String name) {
+        for (int i = 0; i < photosErr.size(); i++) {
+            if (photosErr.get(i).first.equals(name)) {
+                photosErr.remove(i);
+            }
+        }
+    }
+
+    public void takePicture(String name){
+        camera = new Camera.Builder()
+                .resetToCorrectOrientation(true)
+                .setTakePhotoRequestCode(2)
+                .setDirectory("BoxScannerPics")
+                .setName(name + System.currentTimeMillis())
+                .setImageFormat(Camera.IMAGE_JPEG)
+                .setCompression(75)
+                .build(mActivity);
+        try {
+            camera.takePicture();
+        } catch (IllegalAccessException e) {
+            Functions.err(e);
+        }
+    }
+
+    public Camera getCamera() {
         return camera;
+    }
+
+    private void getScrollHandler() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ScrollView scrollView =
+                        ((ScrollView) dialog.findViewById(R.id.ScrollView));
+                if (scrollView != null) scrollView.smoothScrollTo(0, 0);
+            }
+        }, 100);
+    }
+
+    /////////////////////////////////////////DIALOGS///////////////////////////////////////////////
+
+    private void addNewErrorDialog(final Activity activity) {
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
+        LayoutInflater inflater = activity.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.add_new_error_dialog, null);
+        dialogBuilder.setView(dialogView);
+
+        dialogBuilder.setTitle(activity.getString(R.string.btn_add_error));
+        final EditText edt = (EditText) dialogView.findViewById(R.id.edit1);
+
+        dialogBuilder.setPositiveButton(activity.getString(R.string.add_error), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String newErrorText = edt.getText().toString();
+                addError(newErrorText,false,0,false);
+
+            }
+        });
+        dialogBuilder.setNegativeButton((activity.getString(R.string.cancel)), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+            }
+        });
+        AlertDialog b = dialogBuilder.create();
+        b.show();
     }
 
 }

@@ -9,7 +9,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
@@ -19,20 +18,36 @@
             android:layout_weight="0.1"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/dvacetDva" />
+
         <TextView
             android:id="@+id/textErrCount"
-            android:text="3x"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/dvacetDva" />
-        <ImageButton
+
+
+        <Button
             android:id="@+id/btn_error"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:background="@null"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/button_ic_err"
+            android:drawableEnd="@drawable/icon_error"
+            android:text=""
+            android:textSize="@dimen/dvacetDva" />
+
+        <Button
+            android:id="@+id/btn_make_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10px"
+            android:layout_gravity="center"
+            android:drawableEnd="@drawable/icon_photo"
+            android:background="@drawable/button"
             android:scaleType="fitCenter"
-            android:src="@drawable/imagebutton_selector" />
+            android:layout_marginRight="5px" />
 
 
     </LinearLayout>
@@ -41,7 +56,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-
         android:textSize="@dimen/dvacetDva" />
     <TextView
         android:id="@+id/textPrefill"

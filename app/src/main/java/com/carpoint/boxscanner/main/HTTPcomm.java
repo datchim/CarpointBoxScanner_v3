@@ -8,14 +8,11 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
-
 import com.carpoint.boxscanner.MainActivity;
 import com.carpoint.boxscanner.R;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -24,7 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+
 
 public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
 
@@ -36,29 +33,34 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
     private OnFinish onFinish;
     private OnFinishBitmap onFinishBitmap;
     private String  endUrl;
-    private boolean showAll;
+    private boolean showAll, onlyBlocked;
 
-    //getErroListProtocol; getQuestions
-    public HTTPcomm(Context context, OnFinish onFinish, boolean isQuestions ) {
-        mContext = context;
-        this.onFinish = onFinish;
-        if (isQuestions)
-            endUrl ="getQuestions";
-        else
-            endUrl ="getProtoErrorList";
-        this.execute();
 
-    }
-    public HTTPcomm(Context context, OnFinish onFinish, boolean isQuestions , boolean showAll) {
+    public HTTPcomm(Context context, OnFinish onFinish, String item,boolean showAll ) {
         mContext = context;
         this.onFinish = onFinish;
         this.showAll = showAll;
-        if (isQuestions)
-            endUrl ="getQuestions";
-        else
-            endUrl ="getProtoErrorList";
-        this.execute();
 
+        switch (item){
+            case "questions":
+                endUrl ="getQuestions";
+                break;
+            case "errorList":
+                endUrl ="getProtoErrorList";
+                break;
+            case "errorList2":
+                this.showAll = false;
+                this.onlyBlocked = true;
+                endUrl ="getProtoErrorList";
+                break;
+            case "uncompleteProtocols":
+                endUrl ="getUncompleteList";
+                break;
+            case "getUserList":
+                endUrl ="getUserList";
+                break;
+        }
+        this.execute();
     }
 
     //getPhoto
@@ -131,19 +133,16 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                 case "getProtoErrorList":
                     if(showAll)
                         customer.put("showall",1);
+                    if(onlyBlocked)
+                        customer.put("onlyBlocked",1);
                     writeText(os, "login", customer.toString());
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
                     break;
-
                 case "getQuestions":
+                case "getUserList":
+                case "getUncompleteList":
                     writeText(os, "login", customer.toString());
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
-                    if (customer != null) {
-                        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
-                                con.getOutputStream());
-                        outputStreamWriter.write(customer.toString());
-                        outputStreamWriter.flush();
-                    }
                 break;
 
                 case "getPhoto":
@@ -154,6 +153,8 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
 
                     writeText(os, "login", customer.toString());
                     writeText(os, "photo", photo.toString());
+
+
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
                 break;
 
@@ -193,6 +194,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                     }
                     Bitmap sign = (Bitmap) params[5];
                     writeBitmap(os, "sign",sign, 100);
+                    os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
                  break;
             }
 
@@ -220,7 +222,6 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                     }
 
                     in.close();
-                    Log.e("rr", receivestring);
                     if (receivestring.length() == 0)
                         return null;
                     return receivestring;
@@ -230,6 +231,8 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                 }
             } else if (con.getResponseCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
                 Functions.toast(mContext, R.string.msg_error_unauthorized);
+                ((MainActivity)mContext).setHeadTitle();
+
             } else {
                 Functions.toast(mContext, R.string.msg_error_hhtp);
 
@@ -251,7 +254,6 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
             Log.e("CP", Arrays.toString(e.getStackTrace()));
         }
     }
-
 
     private void writeBitmap(OutputStream os, String name, Bitmap bitmap, int quality) {
         try {
@@ -278,16 +280,20 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
     protected void onPostExecute(Object result) {
         super.onPostExecute(result);
 
-            if (endUrl.equals("getProtoErrorList")|| endUrl.equals("getProtocol")|| endUrl.equals("resolveError")){
-                try {
-                    if (onFinish != null)
-                        onFinish.onResult((String)result);
-                } catch (Exception e) {
-                    Functions.toast(mContext,R.string.protocol_not_found);
-                }
-            }
-
             switch (endUrl){
+                case "getProtoErrorList":
+                case "getProtocol":
+                case "getUserList":
+                case "resolveError":
+                case "getUncompleteList":
+                    try {
+                        if (onFinish != null)
+                            onFinish.onResult((String)result);
+                    } catch (Exception e) {
+                        Functions.toast(mContext,R.string.error);
+                        Functions.err(e);
+                    }
+                    break;
 
                case "getQuestions":
                    try {
@@ -307,17 +313,17 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                    } catch (Exception e) {
                        Functions.toast(mContext, R.string.msg_error_hhtp);
                    }
-                break;
+                   break;
 
                 case "getPhoto":
                     try {
                         if (onFinishBitmap != null)
                             onFinishBitmap.onResult((Bitmap)result);
                     } catch (Exception e) {
-                        Functions.toast(mContext,R.string.protocol_not_found);
+                        Functions.toast(mContext,R.string.error);
+                        Functions.err(e);
                     }
                     break;
-
 
                 case "sendProtocol":
                     try {
@@ -337,8 +343,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                         if (onFinish != null)
                             onFinish.onResult(null);
                     }
-                break ;
-
+                    break ;
             }
     }
 

@@ -25,4 +25,21 @@
         <item name="android:scrollbarSize">5dp</item>
         <item name="android:paddingRight">2dp</item>
     </style>
+
+    <style name="MyDialog" parent="Base.Theme.AppCompat.Light.Dialog">
+        <item name="android:textSize">30sp</item>
+    </style>
+
+    <style name="DialogTitle" parent="TextAppearance.AppCompat.Large">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@drawable/backg_app</item>
+        <item name="android:buttonStyle">@style/MyButtonStyle</item>
+    </style>
+
 </resources>

@@ -6,26 +6,22 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
-
 import com.carpoint.boxscanner.R;
 
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 
 public class CPPsendRest extends AsyncTask<Void, Boolean, Boolean> {
 
@@ -101,12 +97,10 @@ public class CPPsendRest extends AsyncTask<Void, Boolean, Boolean> {
                     }
                 }
 
-
                 if (head.length() > 0 && answers.length()>0 && errorAnswers.length()>0) {
                     if (!sendOne(to_send.get(i), new JSONObject(head), answers, errorAnswers, photos, photosErr,sign))
                         return false;
                 }
-
 
             }
             return true;
@@ -156,7 +150,7 @@ public class CPPsendRest extends AsyncTask<Void, Boolean, Boolean> {
             writeText(os, "errors", errorAnswers);
 
             for (int i = 0; i < photos.size(); i++) {
-                String idphoto = photos.get(i).first.toString();
+                String idphoto = photos.get(i).first;
                 Bitmap bitmap = photos.get(i).second;
                 writeBitmap(os, "photo_" + idphoto, bitmap, 75);
             }
@@ -200,13 +194,12 @@ public class CPPsendRest extends AsyncTask<Void, Boolean, Boolean> {
         try {
             if (bitmap == null || bitmap.getByteCount() == 0)
                 return;
-            ;
+
             os.write((delimiter + boundary + "\r\n").getBytes());
             os.write(("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + name + ".jpg" + "\"\r\n").getBytes());
             os.write(("Content-Type: application/octet-stream\r\n").getBytes());
             os.write(("Content-Transfer-Encoding: binary\r\n").getBytes());
             os.write("\r\n".getBytes());
-
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, bos);

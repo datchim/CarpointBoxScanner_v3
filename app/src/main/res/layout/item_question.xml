@@ -9,6 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="0.5"
         android:layout_marginTop="8dp"
         android:layout_gravity="center_vertical"
         android:orientation="horizontal">
@@ -21,53 +22,82 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/dvacetDva" />
 
-        <ImageButton
+        <Button
             android:id="@+id/btn_error"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:background="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/imagebutton_selector" />
-
-        <TextView
-            android:id="@+id/textErrCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_gravity="center"
+            android:background="@drawable/button_ic_err"
+            android:drawableEnd="@drawable/icon_error"
+            android:text=""
             android:textSize="@dimen/dvacetDva" />
+
+        <Button
+            android:id="@+id/btn_make_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10px"
+            android:layout_gravity="center"
+            android:drawableEnd="@drawable/icon_photo"
+            android:background="@drawable/button"
+            android:scaleType="fitCenter"
+            android:layout_marginRight="5px" />
+
     </LinearLayout>
 
     <RadioGroup
         android:id="@+id/radioGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/pet"
+        android:layout_marginStart="@dimen/pet"
+        android:layout_marginEnd="@dimen/pet"
         android:orientation="horizontal">
 
+        <RadioButton
+            android:id="@+id/rgNa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/deset"
+            android:layout_weight="1"
+            android:text="@string/notavailable"
+            android:clickable="true"
+            android:visibility="gone"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetPet" />
         <RadioButton
             android:id="@+id/rgNo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/osmnact"
+            android:layout_marginEnd="@dimen/deset"
             android:layout_weight="1"
-            android:scaleX="1.2"
-            android:scaleY="1.2"
+            android:background="@drawable/btn_no_bg"
             android:text="@string/no"
+            android:clickable="true"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="@dimen/osmnact" />
+            android:textSize="@dimen/dvacetPet" />
 
         <RadioButton
             android:id="@+id/rgYes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/deset"
             android:layout_weight="1"
-            android:scaleX="1.2"
-            android:scaleY="1.2"
+            android:background="@drawable/btn_yes_bg"
             android:text="@string/yes"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="@dimen/osmnact" />
+            android:textSize="@dimen/dvacetPet" />
 
     </RadioGroup>
-
+    <com.carpoint.boxscanner.main.MyEditText
+        android:id="@+id/editAnswer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginTop="@dimen/deset"
+        android:inputType="number"
+        android:ems="10"
+        android:textSize="@dimen/dvacetDva" />
     <TextView
         android:id="@+id/textPrefill"
         android:layout_width="match_parent"

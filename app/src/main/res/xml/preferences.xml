@@ -6,13 +6,7 @@
         <EditTextPreference
             android:key="url_preference"
             android:title="@string/Preferences_Carpoint_partners_url" />
-        <EditTextPreference
-            android:key="username_preference"
-            android:title="@string/Preferences_Carpoint_partners_Username" />
-        <EditTextPreference
-            android:inputType="textPassword"
-            android:key="passwort_preference"
-            android:title="@string/Preferences_Carpoint_partners_Password" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

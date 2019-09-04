@@ -13,9 +13,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/lang"
             android:gravity="right|center_vertical"
             android:paddingRight="5dp"
+            android:text="@string/lang"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/dvacetDva" />
 
@@ -28,13 +28,36 @@
             android:layout_weight="1"
             android:textSize="@dimen/dvacetDva" />
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/nfc_write"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:text="@string/nfc_write"
+            android:textSize="@dimen/dvacet" />
 
-    <Button
-        android:id="@+id/nfc_write"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/nfc_write"
-        android:textSize="@dimen/dvacet" />
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="0.1">
+
+        </View>
+        <Button
+            android:id="@+id/login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/patnact"
+            android:paddingEnd="@dimen/patnact"
+            android:layout_alignParentEnd="true"
+            android:text="@string/login"
+            android:textSize="@dimen/dvacet" />
+
+    </LinearLayout>
+
+
 
     <ImageView
         android:layout_width="match_parent"
@@ -46,36 +69,88 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="vertical"
-        android:padding="30dp">
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/text_errors"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="@color/red"
-            android:gravity="center_horizontal"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="@dimen/dvacetDva" />
-        <Button
-            android:id="@+id/list_error"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:text="@string/list_of_errors"
-            android:textSize="@dimen/dvacetDva" />
-        <Button
-            android:id="@+id/start_scanning"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.3"
-            android:layout_margin="20dp"
-            android:padding="40dp"
-            android:text="@string/startScanning"
-            android:textSize="@dimen/dvacetDva" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="@dimen/dvacet">
+
+            <TextView
+                android:id="@+id/text_errors"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/red"
+                android:textSize="@dimen/dvacet" />
+
+            <Button
+                android:id="@+id/list_error"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/list_of_errors"
+                android:textSize="@dimen/dvacetDva" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="@dimen/dvacet">
+
+            <TextView
+                android:id="@+id/text_errors2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/red"
+                android:textSize="@dimen/dvacet" />
+
+            <Button
+                android:id="@+id/list_error2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/list_of_errors2"
+                android:textSize="@dimen/dvacetDva" />
+
+        </LinearLayout>
+
+
+
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/text_uncompleted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/red"
+        android:textSize="@dimen/dvacet" />
+
+    <Button
+        android:id="@+id/list_uncompleted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="25dp"
+        android:text="@string/uncompleted_protocols"
+        android:textSize="@dimen/dvacetDva" />
+
+    <Button
+        android:id="@+id/start_scanning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="25dp"
+        android:text="@string/startScanning"
+        android:textSize="@dimen/dvacetDva" />
+
 
 </LinearLayout>

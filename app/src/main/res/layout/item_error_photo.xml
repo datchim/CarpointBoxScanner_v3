@@ -23,24 +23,36 @@
             android:textSize="@dimen/dvacetDva"/>
 
 
-        <ImageButton
+        <Button
             android:id="@+id/btn_make_photo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_camera" />
+            android:layout_marginEnd="@dimen/dvacet"
+            android:layout_gravity="center"
+            android:drawableEnd="@drawable/icon_photo"
+            android:background="@drawable/button"/>
 
         <CheckBox
             android:id="@+id/checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:scaleX="1.5"
-            android:scaleY="1.5"
+            android:layout_marginEnd="@dimen/dvacet"
+            android:scaleX="2"
+            android:scaleY="2"
             android:gravity="center_vertical"
             android:onClick="onCheckboxClicked"/>
 
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/camera_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:visibility="gone"
+        android:adjustViewBounds="true"
+        android:cropToPadding="false"
+        android:scaleType="fitXY" />
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"

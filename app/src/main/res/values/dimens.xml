@@ -1,9 +1,9 @@
 <resources>
+    <dimen name="pet">5dp</dimen>
     <dimen name="deset">10dp</dimen>
     <dimen name="patnact">15dp</dimen>
     <dimen name="osmnact">18dp</dimen>
     <dimen name="dvacet">20dp</dimen>
     <dimen name="dvacetDva">20dp</dimen>
-    <dimen name="dvacetPet">22dp</dimen>
-    <dimen name="pet">5dp</dimen>
+    <dimen name="dvacetPet">25dp</dimen>
 </resources>

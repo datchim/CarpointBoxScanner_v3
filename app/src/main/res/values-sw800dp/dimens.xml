@@ -1,4 +1,6 @@
 <resources>
+
+    <dimen name="pet">10dp</dimen>
     <dimen name="deset">18dp</dimen>
     <dimen name="patnact">27dp</dimen>
 	<dimen name="osmnact">32dp</dimen>

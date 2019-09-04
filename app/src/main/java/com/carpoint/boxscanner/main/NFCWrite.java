@@ -19,17 +19,14 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.carpoint.boxscanner.R;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Iterator;
+
 
 public class NFCWrite extends AppCompatActivity {
 
@@ -194,7 +191,6 @@ public class NFCWrite extends AppCompatActivity {
         try {
             langBytes = lang.getBytes("US-ASCII");
         } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         int langLength = langBytes.length;

@@ -8,8 +8,8 @@
     <string name="cancel">Stornieren</string>
     <string name="clear">Löschen</string>
     <string name="send">Senden</string>
-    <string name="save">Speichern</string>
-    <string name="type">Typ</string>
+    <string name="save">"Speichern "</string>
+    <string name="type">Artikl Nr</string>
     <string name="photoBox1">Foto erstellen 1</string>
     <string name="photoBox2">Foto erstellen 2</string>
     <string name="makeSign">Zeichen erstellen</string>
@@ -79,4 +79,26 @@
     <string name="filled">gefüllt</string>
     <string name="quickSearch">Schnellsuche (B3)</string>
     <string name="showAll">Zeige alles</string>
+    <string name="uncompleted_protocols">Unvollständige Protokolle</string>
+    <string name="uncomplete">Unvollständige</string>
+    <string name="protocols">Protokoll(e)!</string>
+    <string name="block">Blockieren</string>
+    <string name="confirm">Bist du sicher?</string>
+    <string name="mess_save_uncomplete">Unvollständiges Protokoll speichern?</string>
+    <string name="mess_block">Protokoll blockieren?</string>
+    <string name="lang_ro">fortsetzen</string>
+    <string name="further">Forsetzen</string>
+    <string name="out_of_limit">AUSSENGRENZWERT</string>
+    <string name="login">Einloggen</string>
+    <string name="logged">"Eingeloggter: "</string>
+    <string name="state">Status</string>
+    <string name="wrong">Fehl</string>
+    <string name="release">Freigeben</string>
+    <string name="place">Platz</string>
+    <string name="not_logged_in">Nicht eingeloggt</string>
+    <string name="logout">Logout</string>
+    <string name="repaired">Behoben</string>
+    <string name="youWereLoggedOut">You were logged out</string>
+    <string name="first_finish_errors">Sie müssen zuerst die Fehler beheben, bevor Sie ein neues Protokoll erstellen können.</string>
+    <string name="unrelease">Nicht freigegeben</string>
 </resources>

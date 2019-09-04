@@ -40,10 +40,42 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/llPlace"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/place"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/osmnact" />
+
+
+        <com.carpoint.boxscanner.main.CustomAutoCompleteTextView
+            android:id="@+id/dropdownPlace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/dvacetDva" />
+
+    </LinearLayout>
+
     <Button
         android:id="@+id/btn_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:text="@string/search" />
+        android:text="@string/search"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+    <Button
+        android:id="@+id/btn_show_all"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/showAll"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
 </LinearLayout>

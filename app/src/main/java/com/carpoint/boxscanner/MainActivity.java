@@ -3,6 +3,7 @@ package com.carpoint.boxscanner;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,14 +11,17 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
+
+import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -33,32 +37,44 @@ import android.widget.Toast;
 
 import com.carpoint.boxscanner.main.CPPsendRest;
 import com.carpoint.boxscanner.main.CheckVersion;
-import com.carpoint.boxscanner.main.ErrorListDialog;
+import com.carpoint.boxscanner.main.ListDialog;
 import com.carpoint.boxscanner.main.FileMan;
 import com.carpoint.boxscanner.main.FormFilling;
 import com.carpoint.boxscanner.main.Functions;
 import com.carpoint.boxscanner.main.HTTPcomm;
 import com.carpoint.boxscanner.main.NFCWrite;
 import com.carpoint.boxscanner.main.PreferencesActivity;
+import com.carpoint.boxscanner.main.UserDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
-    public static String language = "lang_de", lang_de = "lang_de";
+    public static String language = "lang_de", lang_de = "lang_de",
+            tagErrorList = "errorList", tagErrorList2 = "errorList2", tagQuestions = "questions", tagUncompleteProto = "uncompleteProtocols", tagUserList = "getUserList", tagUsers = "users",
+            tagProtocols = "protocols", tagUsername = "username", tagUncomplete = "uncomplete", tagErrors = "errors", tagSharedPrefs = "com.carpoint.boxscanner_preferences",
+            CARPOINT_username = "username_preference", CARPOINT_fullname = "fullname_preference";
 
     private final int REQUEST_PERMISSION_ID = 99;
     private final String LAST_UPDATE = "LASTUPDATE";
-    public ErrorListDialog errorListDialog;
+    public ListDialog listDialog;
     private NfcAdapter mNfcAdapter;
+    private Button login;
     private boolean allowLangChange, ignoreSelection, performSend;
+
+    /////////////////////////////////////////ACTIVITY LIFE CYCLE /////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +86,18 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     if (!Functions.checkUpdateAndHWEnable(MainActivity.this)) {
+                        return;
+                    }
+
+                    String url = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("url_preference", "");
+                    String name = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(CARPOINT_fullname, "");
+                    if(name.length() == 0){
+                        Functions.toast(MainActivity.this, R.string.settup);
+                        return;
+                    }
+
+                    if (url.length() == 0) {
+                        Functions.toast(MainActivity.this, R.string.settup);
                         return;
                     }
 
@@ -88,48 +116,52 @@ public class MainActivity extends ActionBarActivity {
                                     startActivity(intent);
                                 }
                             }
-                        },true);
+                        }, tagQuestions, false);
                     }
                 }
             });
+
             ((Button) findViewById(R.id.list_error)).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    downloadList(tagErrorList);
+                }
+            });
 
-                    final AlertDialog mWaitDownloadDialog = new AlertDialog.Builder(MainActivity.this)
-                            .setView(getLayoutInflater().inflate(R.layout.wait_download, null))
-                            .setNegativeButton(R.string.cancel,
-                                    new DialogInterface.OnClickListener() {
+            ((Button) findViewById(R.id.list_error2)).setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    downloadList(tagErrorList2);
+                }
+            });
 
-                                        @Override
-                                        public void onClick(DialogInterface dialog,
-                                                            int which) {
-                                            if (dialog != null)
-                                                dialog.cancel();
-                                        }
-                                    }).create();
-                    mWaitDownloadDialog.setCancelable(false);
-                    mWaitDownloadDialog.show();
-                    new HTTPcomm(MainActivity.this, new HTTPcomm.OnFinish() {
-                        @Override
-                        public void onResult(String response) {
-                            if (response != null) {
-                                try {
-                                    mWaitDownloadDialog.dismiss();
-                                    JSONObject tmp = new JSONObject(response);
-                                    JSONArray protocols = new JSONArray();
-                                    protocols = tmp.getJSONArray("protocols");
+            ((Button) findViewById(R.id.list_uncompleted)).setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    downloadList(tagUncompleteProto);
+                }
+            });
 
+            login = ((Button) findViewById(R.id.login));
+            login.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(getPrefs(MainActivity.this).getString(CARPOINT_fullname, "").length() ==0){
+                        downloadList(tagUserList);
+                    }else{
+                        SharedPreferences.Editor pEditor = getPrefs(MainActivity.this).edit();
+                        pEditor.remove(CARPOINT_username);
+                        pEditor.remove(CARPOINT_fullname);
+                        pEditor.remove(UserDialog.CARPOINT_password);
+                        pEditor.commit();
+                        login.setText(R.string.login);
 
-                                    errorListDialog = new ErrorListDialog();
-                                    errorListDialog.showDialog(MainActivity.this, protocols);
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    }, false );
+                        TextView textErr = (TextView) findViewById(R.id.text_errors);
+                        textErr.setText("");
+                        TextView textUncomplete = (TextView) findViewById(R.id.text_uncompleted);
+                        textUncomplete.setText("");
+                        Functions.toast(MainActivity.this, R.string.youWereLoggedOut);
+                    }
                 }
             });
 
@@ -147,7 +179,6 @@ public class MainActivity extends ActionBarActivity {
             langSpinner.setAdapter(new ArrayAdapter<String>(this, R.layout.item_spinner, Arrays.asList(langs)));
 
 
-            Configuration conf = getResources().getConfiguration();
             String locale = getResources().getConfiguration().getLocales().get(0).toString();
             locale = locale.split("_")[0];
             ignoreSelection = true;
@@ -172,7 +203,7 @@ public class MainActivity extends ActionBarActivity {
                         }
                         if (allowLangChange) {
                             allowLangChange = false;
-                            Log.e("sdsd", "gsdgdfg");
+
                             switch (position) {
                                 case 0:
                                     setLocale("de");
@@ -208,8 +239,191 @@ public class MainActivity extends ActionBarActivity {
             Functions.checkUpdateAndHWEnable(this);
 
             performSend = true;
+
+            Bitmap.Config conf = Bitmap.Config.ARGB_8888; // see other conf types
+            Bitmap croppedImage = Bitmap.createBitmap(100, 100, conf);
+
+            croppedImage = Bitmap.createScaledBitmap(croppedImage, croppedImage.getWidth() / 2,
+                    croppedImage.getHeight() / 2, false);
+
         } catch (Exception e) {
             Functions.err(e);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refresh();
+    }
+
+    public void refresh(){
+        try {
+            if (performSend && Functions.checkInternetEnable(MainActivity.this)) {
+                performSend = false;
+                new CPPsendRest(this);
+            } else if (Functions.checkInternetEnable(MainActivity.this)
+                    && getPreferences(MODE_PRIVATE).getInt(
+                    LAST_UPDATE, 0) != (int) (new Date()
+                    .getTime() * 0.001 / 3600 / 24)) {
+                new CheckVersion(MainActivity.this);
+
+                new HTTPcomm(this, null, tagQuestions, false);
+
+                Editor e = getPreferences(MODE_PRIVATE).edit();
+                e.putInt(
+                        LAST_UPDATE,
+                        (int) (new Date().getTime() * 0.001 / 3600 / 24));
+                e.commit();
+
+            }
+            allowLangChange = true;
+            Functions.setupForegroundDispatch(this, mNfcAdapter);
+
+            refreshErrors(tagErrorList);
+            refreshErrors(tagErrorList2);
+            refreshErrors(tagUncompleteProto);
+
+            if(getPrefs(MainActivity.this).getString(CARPOINT_fullname, "").length() ==0){
+                login.setText(R.string.login);
+            }else{
+                login.setText(R.string.logout);
+            }
+
+            setHeadTitle();
+        } catch (Exception e) {
+            Functions.err(e);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        Functions.stopForegroundDispatch(this, mNfcAdapter);
+        super.onPause();
+    }
+
+    /////////////////////////NETWORK////////////////////////
+
+    public void downloadList(final String item) {
+
+        final AlertDialog mWaitDownloadDialog = new AlertDialog.Builder(MainActivity.this)
+                .setView(getLayoutInflater().inflate(R.layout.wait_download, null))
+                .setNegativeButton(R.string.cancel,
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog,
+                                                int which) {
+                                if (dialog != null)
+                                    dialog.cancel();
+                            }
+                        }).create();
+        mWaitDownloadDialog.setCancelable(false);
+        mWaitDownloadDialog.show();
+        new HTTPcomm(MainActivity.this, new HTTPcomm.OnFinish() {
+            @Override
+            public void onResult(String response) {
+                try {
+                    if (response != null) {
+                        if (item.equals(tagUserList)) {
+                            JSONObject tmp = new JSONObject(response);
+                            JSONArray users = tmp.getJSONArray(tagUsers);
+                            UserDialog userDialog = new UserDialog(MainActivity.this, users);
+                            userDialog.showDialog();
+                            mWaitDownloadDialog.dismiss();
+                        } else {
+                            JSONObject tmp = new JSONObject(response);
+                            JSONArray protocols = new JSONArray();
+                            protocols = tmp.getJSONArray(tagProtocols);
+
+                            listDialog = new ListDialog();
+                            listDialog.showDialog(MainActivity.this, protocols, item, tmp.optBoolean("is_admin"), tmp.optJSONArray("places"));
+
+                        }
+                    }
+                    mWaitDownloadDialog.dismiss();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, item, false);
+
+    }
+
+    public void refreshErrors(final String item) {
+        try {
+            //Download notify
+            new HTTPcomm(MainActivity.this, new HTTPcomm.OnFinish() {
+                @Override
+                public void onResult(String response) {
+                    if (response != null) {
+                        try {
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                            String username = prefs.getString(CARPOINT_username, "");
+
+                            JSONObject tmp = new JSONObject(response);
+                            JSONArray protocols = tmp.getJSONArray(tagProtocols);
+
+                            int countErr = 0;
+                            int countUncomplete = 0;
+
+                            for (int i = 0; i < protocols.length(); i++) {
+                                if (item.startsWith(tagErrorList)) {
+                                    if (protocols.optJSONObject(i).optString(tagUsername, "").equals(username)) {
+                                        JSONArray errors = protocols.optJSONObject(i).optJSONArray(tagErrors);
+                                        countErr += errors.length();
+                                    }
+                                } else {
+                                    if (protocols.optJSONObject(i).optString(tagUsername, "").equals(username) &&
+                                            protocols.optJSONObject(i).optInt(tagUncomplete) == 1) {
+                                        countUncomplete += 1;
+                                    }
+                                }
+                            }
+
+                            TextView textErr = (TextView) findViewById(R.id.text_errors);
+                            TextView textErr2 = (TextView) findViewById(R.id.text_errors2);
+                            TextView textUncomplete = (TextView) findViewById(R.id.text_uncompleted);
+
+                            if (item.equals(tagErrorList)) {
+                                if (countErr > 0) {
+                                    textErr.setText(getString(R.string.youHave) + " " + countErr + " " + getString(R.string.errors));
+                                } else {
+                                    textErr.setText("");
+                                }
+                            }else if (item.equals(tagErrorList2)) {
+                                if (countErr > 0) {
+                                    textErr2.setText(getString(R.string.youHave) + " " + countErr + " " + getString(R.string.errors));
+                                } else {
+                                    textErr2.setText("");
+                                }
+                            } else {
+                                if (countUncomplete > 0) {
+                                    textUncomplete.setText(getString(R.string.uncomplete) + " " + countUncomplete + " " + getString(R.string.protocols));
+                                } else {
+                                    textUncomplete.setText("");
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }, item, false);
+        } catch (Exception e) {
+            Functions.err(e);
+        }
+    }
+
+    //////////////////////INNER LOGIC/////////////////
+
+    public void setHeadTitle() {
+        String fullname = getPrefs(MainActivity.this).getString(CARPOINT_fullname, "");
+        if (fullname.length() > 0) {
+            MainActivity.this.setTitle(MainActivity.this.getString(R.string.logged)
+                    + fullname);
+        } else {
+            MainActivity.this.setTitle(MainActivity.this.getString(R.string.not_logged_in));
         }
     }
 
@@ -225,86 +439,9 @@ public class MainActivity extends ActionBarActivity {
         startActivity(refresh);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        try {
-            if (performSend && Functions.checkInternetEnable(MainActivity.this)) {
-                performSend = false;
-                new CPPsendRest(this);
-            } else if (Functions.checkInternetEnable(MainActivity.this)
-                    && getPreferences(MODE_PRIVATE).getInt(
-                    LAST_UPDATE, 0) != (int) (new Date()
-                    .getTime() * 0.001 / 3600 / 24)) {
-                new CheckVersion(MainActivity.this);
-
-                new HTTPcomm(this,null,true);
-
-                Editor e = getPreferences(MODE_PRIVATE).edit();
-                e.putInt(
-                        LAST_UPDATE,
-                        (int) (new Date().getTime() * 0.001 / 3600 / 24));
-                e.commit();
-
-            }
-
-            allowLangChange = true;
-            Functions.setupForegroundDispatch(this, mNfcAdapter);
-
-            refreshErrors();
-        } catch (Exception e) {
-            Functions.err(e);
-        }
+    private SharedPreferences getPrefs(Context context) {
+        return context.getSharedPreferences(tagSharedPrefs, Context.MODE_PRIVATE);
     }
-
-    public void refreshErrors() {
-        try {
-            //Download notify
-            new HTTPcomm(MainActivity.this, new HTTPcomm.OnFinish() {
-                @Override
-                public void onResult(String response) {
-                    if (response != null) {
-                        try {
-                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                            String username = prefs.getString("username_preference", "");
-
-                            JSONObject tmp = new JSONObject(response);
-                            JSONArray protocols = new JSONArray();
-                            protocols = tmp.getJSONArray("protocols");
-
-                            int count = 0;
-                            for (int i = 0; i < protocols.length(); i++) {
-                                if (protocols.optJSONObject(i).optString("username", "").equals(username)) {
-                                    JSONArray errors = protocols.optJSONObject(i).optJSONArray("errors");
-                                    count += errors.length();
-                                }
-                            }
-
-                            TextView text = (TextView) findViewById(R.id.text_errors);
-                            if (count > 0) {
-                                text.setText(getString(R.string.youHave) + " " + count + " " + getString(R.string.errors));
-                            } else {
-                                text.setText("");
-
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            },false);
-        } catch (Exception e) {
-            Functions.err(e);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        Functions.stopForegroundDispatch(this, mNfcAdapter);
-
-        super.onPause();
-    }
-
 
     // ////////////////////////// OPTIONS ////////////////////////////
     @Override
@@ -325,7 +462,7 @@ public class MainActivity extends ActionBarActivity {
         }
         if (id == R.id.download_questions) {
             if (Functions.checkInternetEnable(MainActivity.this)) {
-                new HTTPcomm(this,null,true);
+                new HTTPcomm(this, null, tagQuestions, false);
             }
             return true;
         }
@@ -336,7 +473,8 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // //////////////////PERMISSIONS/////////////////
+    ////////////////////////PERMISSIONS////////////////////////////
+
     @SuppressLint("NewApi")
     private boolean checkPermissionsGranted() {
         LinkedList<String> missing_permissions = new LinkedList<String>();
@@ -385,11 +523,12 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    ////////////////////////NFC////////////////////////////
 
     @Override
     protected void onNewIntent(Intent intent) {
         try {
-            if (errorListDialog != null) {
+            if (listDialog != null) {
 
                 String action = intent.getAction();
                 if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
@@ -437,11 +576,11 @@ public class MainActivity extends ActionBarActivity {
 
             if (resultstring.length() > 0) {
                 String[] arr = resultstring.split(";;;");
-                if (arr.length > 1 && errorListDialog != null && errorListDialog.editType != null
-                        && errorListDialog.editSerial != null && errorListDialog.btnSearch != null) {
-                    errorListDialog.editType.setText(arr[0]);
-                    errorListDialog.editSerial.setText(arr[1]);
-                    errorListDialog.btnSearch.performClick();
+                if (arr.length > 1 && listDialog != null && listDialog.editType != null
+                        && listDialog.editSerial != null && listDialog.btnSearch != null) {
+                    listDialog.editType.setText(arr[0]);
+                    listDialog.editSerial.setText(arr[1]);
+                    listDialog.btnSearch.performClick();
                 }
             }
         } catch (Exception e) {

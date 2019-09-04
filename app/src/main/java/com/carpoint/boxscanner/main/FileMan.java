@@ -95,6 +95,7 @@ public class FileMan {
 		File f = new File(database, name);
 		return f.exists();
 	}
+
 	public Bitmap getBitmap(String name) {
 		try {
 			return BitmapFactory.decodeFile(database+"/"+name);
@@ -103,7 +104,6 @@ public class FileMan {
 		}
 		return null;
 	}
-
 
 	public void renameFile(String name, String renameTo) {
 		try {
@@ -114,6 +114,7 @@ public class FileMan {
 			Functions.err(e);
 		}
 	}
+
 	public String getDoc(String name) {
 		try {
 			File f = new File(database, name);
@@ -142,6 +143,7 @@ public class FileMan {
 			return "";
 		}
 	}
+
 	public ArrayList<String> getAllDocs() {
 		try {
 			return new ArrayList<String>(Arrays.asList(database.list()));

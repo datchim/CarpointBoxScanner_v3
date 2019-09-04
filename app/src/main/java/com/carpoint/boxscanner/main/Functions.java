@@ -7,12 +7,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.IntentFilter.MalformedMimeTypeException;
+import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NfcAdapter;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.widget.AppCompatTextView;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.carpoint.boxscanner.R;
@@ -21,22 +27,6 @@ import java.util.Arrays;
 
 
 public class Functions {
-
-
-    public static boolean checkUrlAndLogin(Context context) {
-        if (context != null) {
-
-            SharedPreferences prefs = PreferenceManager
-                    .getDefaultSharedPreferences(context);
-            if (prefs.getString("username_preference", "").length() == 0)
-                return false;
-            if (prefs.getString("passwort_preference", "").length() == 0)
-                return false;
-            if (prefs.getString("url_preference", "").length() == 0)
-                return false;
-        }
-        return true;
-    }
 
     public static boolean checkUpdateAndHWEnable(Context context) {
 
@@ -66,6 +56,7 @@ public class Functions {
         } else
             return true;
     }
+
     public static void toast(final Context c, final int text) {
         try {
             if (c != null) {
@@ -124,4 +115,5 @@ public class Functions {
         if (activity != null && adapter != null)
             adapter.disableForegroundDispatch(activity);
     }
+
 }

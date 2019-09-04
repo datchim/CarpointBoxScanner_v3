@@ -59,6 +59,20 @@
             android:layout_marginBottom="10dp"
             android:layout_marginTop="8dp"
             android:background="@android:color/black" />
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:text="@string/further"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/black" />
     </LinearLayout>
 
     <LinearLayout
@@ -112,7 +126,6 @@
             sign:penColor="#000000"
             sign:penSize="5dp" />
 
-
         <Button
             android:id="@+id/btnClear"
             android:layout_width="wrap_content"
@@ -122,51 +135,26 @@
             android:text="@string/clear"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/dvacetDva" />
-
-    </LinearLayout>
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@android:color/black" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="2">
-
-        <Button
-            android:id="@+id/btnBack"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="0.7"
-            android:drawableLeft="@android:drawable/ic_menu_revert"
-            android:text="@string/back"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="@dimen/dvacetDva" />
-
-        <Button
-            android:id="@+id/btnNext"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="1.3"
-            android:drawableRight="@android:drawable/ic_media_play"
-            android:text="@string/next"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="@dimen/dvacetDva" />
-
         <Button
             android:id="@+id/btnSend"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="1.3"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="10dp"
             android:text="@string/send"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="@dimen/dvacetDva"
-            android:visibility="gone" />
+            android:textSize="@dimen/dvacetDva" />
+        <Button
+            android:id="@+id/btnMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="10dp"
+            android:text="@string/menu"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+
     </LinearLayout>
+
 
 </LinearLayout>
