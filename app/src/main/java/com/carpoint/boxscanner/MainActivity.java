@@ -219,7 +219,6 @@ public class MainActivity extends AppCompatActivity {
                                     break;
                             }
                         }
-
                     } catch (Exception e) {
                         Functions.err(e);
                     }
@@ -284,11 +283,6 @@ public class MainActivity extends AppCompatActivity {
             refreshErrors(tagErrorList2);
             refreshErrors(tagUncompleteProto);
 
-            if(getPrefs(MainActivity.this).getString(CARPOINT_fullname, "").length() ==0){
-                login.setText(R.string.login);
-            }else{
-                login.setText(R.string.logout);
-            }
 
             setHeadTitle();
         } catch (Exception e) {
@@ -372,6 +366,12 @@ public class MainActivity extends AppCompatActivity {
                                     if (protocols.optJSONObject(i).optString(tagUsername, "").equals(username)) {
                                         JSONArray errors = protocols.optJSONObject(i).optJSONArray(tagErrors);
                                         countErr += errors.length();
+
+                                        for (int j = 0; j < errors.length(); j++) {
+                                            if (errors.optJSONObject(j).optInt("is_virtual") == 1) {
+                                                countErr= findManuals(errors, errors.optJSONObject(j), errors.optJSONObject(j).optInt("id_question"), countErr);
+                                            }
+                                        }
                                     }
                                 } else {
                                     if (protocols.optJSONObject(i).optString(tagUsername, "").equals(username) &&
@@ -414,6 +414,21 @@ public class MainActivity extends AppCompatActivity {
             Functions.err(e);
         }
     }
+    private int findManuals(JSONArray errors, JSONObject virtual, int id_q, int count) {
+        try {
+            for (int i = 0; i < errors.length(); i++) {
+                if (errors.optJSONObject(i).optInt("id_question") == id_q
+                        && errors.optJSONObject(i).optInt("is_virtual") == 0
+                        && errors.optJSONObject(i).optInt("id_group") == -1) {
+                    count--;
+                }
+            }
+
+        } catch (Exception e) {
+            Functions.err(e);
+        }
+        return count;
+    }
 
     //////////////////////INNER LOGIC/////////////////
 
@@ -424,6 +439,14 @@ public class MainActivity extends AppCompatActivity {
                     + fullname);
         } else {
             MainActivity.this.setTitle(MainActivity.this.getString(R.string.not_logged_in));
+        }
+        if(login != null){
+
+            if(getPrefs(MainActivity.this).getString(CARPOINT_fullname, "").length() ==0){
+                login.setText(R.string.login);
+            }else{
+                login.setText(R.string.logout);
+            }
         }
     }
 
@@ -471,6 +494,13 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void login(){
+        new FileMan(MainActivity.this, "").remove("questions.json");
+        if (Functions.checkInternetEnable(MainActivity.this)) {
+            new HTTPcomm(this, null, tagQuestions, false);
+        }
     }
 
     ////////////////////////PERMISSIONS////////////////////////////

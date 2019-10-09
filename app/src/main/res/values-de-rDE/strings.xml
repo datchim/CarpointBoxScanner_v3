@@ -86,7 +86,6 @@
     <string name="confirm">Bist du sicher?</string>
     <string name="mess_save_uncomplete">Unvollständiges Protokoll speichern?</string>
     <string name="mess_block">Protokoll blockieren?</string>
-    <string name="lang_ro">fortsetzen</string>
     <string name="further">Forsetzen</string>
     <string name="out_of_limit">AUSSENGRENZWERT</string>
     <string name="login">Einloggen</string>

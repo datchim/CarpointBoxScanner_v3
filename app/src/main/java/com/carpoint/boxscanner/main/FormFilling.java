@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -42,7 +43,7 @@ import android.widget.Toast;
 
 import com.carpoint.boxscanner.MainActivity;
 import com.carpoint.boxscanner.R;
-import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.kyanogen.signatureview.SignatureView;
 import com.mindorks.paracamera.Camera;
 
@@ -50,6 +51,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -74,14 +76,14 @@ public class FormFilling extends AppCompatActivity {
     private String actualLang = MainActivity.language;
 
     private JSONObject plans, selectedPlan, head;
-    private JSONArray answers, errorCodesArray, errorAnswers, answersPrefill;
+    private JSONArray answers, errorCodesArray, errorAnswers, answersPrefill, errorCodesArraySolved, errorAnswersSolved;
     private JSONArray questionGroups;
 
     private Button btnSend, btnNext, btnClear, btnSaveUncomplete, btnMenu;
 
     private SignatureView signatureView;
     private Bitmap bitmapSign, bitmap;
-    private boolean doubleBackToExitPressedOnce = false, controller, is_universal;
+    private boolean doubleBackToExitPressedOnce = false, isController, is_universal, isFinishing;
 
     private ArrayList<Pair<Integer, Bitmap>> photos = new ArrayList<>();
     private ArrayList<Pair<String, Bitmap>> photosErr = new ArrayList<>();
@@ -125,6 +127,8 @@ public class FormFilling extends AppCompatActivity {
         head = new JSONObject();
         answers = new JSONArray();
         errorAnswers = new JSONArray();
+        errorAnswersSolved = new JSONArray();
+        errorCodesArraySolved = new JSONArray();
 
 
         try {
@@ -139,10 +143,10 @@ public class FormFilling extends AppCompatActivity {
         }
 
         JSONObject login = plans.optJSONObject(tagLogin);
-        controller = login.optBoolean(tagControler);
+        isController = login.optBoolean(tagControler);
 
         //geting Types
-        ArrayList<String> paletTypes = new ArrayList<>();
+        final ArrayList<String> paletTypes = new ArrayList<>();
         JSONArray tmp = plans.optJSONArray(tagPlans);
         for (int i = 0; i < tmp.length(); i++) {
             paletTypes.add(tmp.optJSONObject(i).optString(tagName) + " (" + tmp.optJSONObject(i).optString(tagDrawDate) + ")");
@@ -151,9 +155,48 @@ public class FormFilling extends AppCompatActivity {
         //geting Error Codes
 
         try {
-            errorCodesArray = new JSONArray();
-            errorCodesArray = plans.optJSONArray(tagError);
+            FileMan fileMan = new FileMan(FormFilling.this, "PAUSE");
+            if (fileMan.fileExists("data")) {
+                JSONObject obj = new JSONObject(fileMan.getDoc("data"));
 
+                planName = obj.optString("planName");
+                serialNumber = obj.optString("serialNumber");
+                prefillFullName = obj.optString("prefillFullName");
+                actualLang = obj.optString("actualLang");
+                actualLayout = obj.optInt("actualLayout");
+                idLastProtocol = obj.optInt("idLastProtocol");
+                photo_id_q = obj.optInt("photo_id_q");
+                photo_id_g = obj.optInt("photo_id_g");
+                selectedPlanIndex = obj.optInt("selectedPlanIndex");
+                selectedPlan = obj.optJSONObject("selectedPlan");
+                head = obj.optJSONObject("head");
+                answers = obj.optJSONArray("answers");
+                errorCodesArray = obj.optJSONArray("errorCodesArray");
+                errorAnswers = obj.optJSONArray("errorAnswers");
+                answersPrefill = obj.optJSONArray("answersPrefill");
+                errorCodesArraySolved = obj.optJSONArray("errorCodesArraySolved");
+                questionGroups = obj.optJSONArray("questionGroups");
+
+                ((TextView) findViewById(R.id.action_bar_title)).setText(planName + "/" + serialNumber);
+
+                layoutCount = questionGroups.length() + 3;
+                is_universal = selectedPlan.optInt(tagIsUniversal, 0) == 1;
+
+                ArrayList<String> imgs = fileMan.getAllDocs();
+                for (int i = 0; i < imgs.size(); i++) {
+                    if (imgs.get(i).startsWith("img_"))
+                        photos.add(new Pair<Integer, Bitmap>(Integer.parseInt(imgs.get(i).replace("img_", "")),
+                                fileMan.getBitmap(imgs.get(i))));
+                    if (imgs.get(i).startsWith("err_"))
+                        photosErr.add(new Pair<String, Bitmap>(imgs.get(i).replace("err_", ""),
+                                fileMan.getBitmap(imgs.get(i))));
+                }
+
+                refresh();
+            } else {
+                errorCodesArray = plans.optJSONArray(tagError);
+                errorCodesArraySolved = new JSONArray(errorCodesArray.toString());
+            }
         } catch (Exception e) {
             Functions.toast(this, R.string.msg_no_error_codes);
             errorCodesArray = new JSONArray();
@@ -177,27 +220,15 @@ public class FormFilling extends AppCompatActivity {
         textVievType.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                String item = parent.getItemAtPosition(position).toString();
+                position = paletTypes.indexOf(item);
                 selectedPlanIndex = position;
                 JSONArray tmp = plans.optJSONArray(tagPlans);
                 textVievType.setText(tmp.optJSONObject(position).optString(tagName));
             }
         });
 
-
-        /*((TextView) findViewById(R.id.action_bar_title)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    Intent refresh = new Intent(FormFilling.this, FormFilling.class);
-                    startActivity(refresh);
-                    FormFilling.this.finish();
-
-                } catch (Exception e) {
-                    Functions.err(e);
-                }
-
-            }
-        });*/
 
         btnNext.setOnClickListener(new View.OnClickListener() {
 
@@ -428,22 +459,35 @@ public class FormFilling extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        try {
+            if (actualLayout > 1) {
 
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            return;
+                actualLayout = 1;
+                refresh();
+            } else {
+
+                if (doubleBackToExitPressedOnce) {
+                    isFinishing = true;
+                    new FileMan(FormFilling.this, "").removeFolder("PAUSE");
+                    super.onBackPressed();
+                    return;
+                }
+
+                this.doubleBackToExitPressedOnce = true;
+                Toast.makeText(this, R.string.backHit, Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        doubleBackToExitPressedOnce = false;
+                    }
+                }, 2000);
+            }
+        } catch (Exception e) {
+            Functions.err(e);
         }
 
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, R.string.backHit, Toast.LENGTH_SHORT).show();
-
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce = false;
-            }
-        }, 2000);
     }
 
     @Override
@@ -462,6 +506,7 @@ public class FormFilling extends AppCompatActivity {
         super.onResume();
         try {
             Functions.setupForegroundDispatch(this, mNfcAdapter);
+            new FileMan(FormFilling.this, "").removeFolder("PAUSE");
         } catch (Exception e) {
             Functions.err(e);
         }
@@ -469,6 +514,44 @@ public class FormFilling extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        try {
+            if (!isFinishing && answers != null && answers.length() > 0) {
+
+                JSONObject toSave = new JSONObject();
+                toSave.put("planName", planName);
+                toSave.put("serialNumber", serialNumber);
+                toSave.put("prefillFullName", prefillFullName);
+                toSave.put("actualLayout", actualLayout);
+                toSave.put("idLastProtocol", idLastProtocol);
+                toSave.put("actualLang", actualLang);
+                toSave.put("selectedPlan", selectedPlan);
+                toSave.put("head", head);
+                toSave.put("answers", answers);
+                toSave.put("errorCodesArray", errorCodesArray);
+                toSave.put("errorAnswers", errorAnswers);
+                toSave.put("answersPrefill", answersPrefill);
+                toSave.put("errorCodesArraySolved", errorCodesArraySolved);
+                toSave.put("errorAnswersSolved", errorAnswersSolved);
+                toSave.put("questionGroups", questionGroups);
+                toSave.put("isController", isController);
+                toSave.put("is_universal", is_universal);
+                toSave.put("photo_id_q", photo_id_q);
+                toSave.put("photo_id_g", photo_id_g);
+                toSave.put("selectedPlanIndex", selectedPlanIndex);
+
+                FileMan f = new FileMan(FormFilling.this, "PAUSE");
+                f.saveDoc("data", toSave);
+
+                for (int i = 0; i < photos.size(); i++) {
+                    f.saveBitmap("img_" + photos.get(i).first, photos.get(i).second);
+                }
+                for (int i = 0; i < photosErr.size(); i++) {
+                    f.saveBitmap("err_" + photosErr.get(i).first, photosErr.get(i).second);
+                }
+            }
+        } catch (Exception e) {
+            Functions.err(e);
+        }
         Functions.stopForegroundDispatch(this, mNfcAdapter);
         super.onPause();
     }
@@ -515,7 +598,7 @@ public class FormFilling extends AppCompatActivity {
                 }, 100);
 
             } else if (actualLayout == layoutCount - 1) {
-                if (controller) {
+                if (isController) {
                     llscroll.setVisibility(View.VISIBLE);
 
                     JSONObject last = selectedPlan.optJSONObject(tagLastQ);
@@ -555,7 +638,7 @@ public class FormFilling extends AppCompatActivity {
             getLayoutInflater().inflate(R.layout.item_signposthead, llQuestions, true);
             for (int i = 0; i < questionGroups.length(); i++) {
                 JSONObject question = questionGroups.optJSONObject(i);
-                if (!controller && question.optInt("only_controller") == 1) {
+                if (!isController && question.optInt("only_controller") == 1) {
                     continue;
                 }
 
@@ -564,9 +647,10 @@ public class FormFilling extends AppCompatActivity {
                 Button btnQuNa = ((Button) ll.findViewById(R.id.question_name));
 
                 TextView state = ((TextView) ll.findViewById(R.id.state));
-                Pair<Integer, Integer> counterr = countGroupErrors(questionGroups.optJSONObject(i));
+                int counterr = countGroupErrors(errorAnswers, questionGroups.optJSONObject(i)).second;
+                final Pair<JSONArray, Integer> counterrSolved = countGroupErrors(errorAnswersSolved, questionGroups.optJSONObject(i));
 
-                if (isPageFilled(questionGroups.getJSONObject(i)) && counterr.first == 0) {
+                if (isPageFilled(questionGroups.getJSONObject(i)) && counterr == 0) {
                     state.setText(R.string.state_ok);
                     state.setBackgroundColor(Color.GREEN);
 
@@ -574,12 +658,19 @@ public class FormFilling extends AppCompatActivity {
                     if (isAllOk) isAllOk = false;
                 }
 
-                if (counterr.first > 0) {
+                if (counterr > 0) {
                     state.setText(R.string.state_nok);
                     state.setBackgroundColor(Color.RED);
                 }
-                ((TextView) ll.findViewById(R.id.cout_err)).setText(String.valueOf(counterr.first));
-                ((TextView) ll.findViewById(R.id.cout_repaired)).setText(String.valueOf(counterr.second));
+                ((TextView) ll.findViewById(R.id.cout_err)).setText(String.valueOf(counterr));
+                TextView repa = (TextView) ll.findViewById(R.id.cout_repaired);
+                repa.setText(String.valueOf(counterrSolved.second));
+                repa.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new RepairedDialog(FormFilling.this, counterrSolved.first, errorCodesArraySolved);
+                    }
+                });
 
                 btnQuNa.setText(question.optString(actualLang, ""));
                 final int finalI = i;
@@ -650,7 +741,7 @@ public class FormFilling extends AppCompatActivity {
 
     public void displayQuestion(final JSONObject q, final boolean isLast) {
 
-        if (!controller && q.optInt("only_controller") == 1) {
+        if (!isController && q.optInt("only_controller") == 1) {
             return;
         }
 
@@ -674,9 +765,9 @@ public class FormFilling extends AppCompatActivity {
                 break;
         }
         if (type.equals(tagText) || (type.equals(tagNumber)) || (type.equals(tagYesNo)) || (type.equals(tagNumberYes))) {
-            //  ll2.findViewById(R.id.textPrefill).setVisibility(controller ? View.VISIBLE : View.GONE);
-            ll2.findViewById(R.id.btn_error).setVisibility(controller ? View.VISIBLE : View.GONE);
-            ll2.findViewById(R.id.btn_make_photo).setVisibility(controller ? View.VISIBLE : View.GONE);
+            //  ll2.findViewById(R.id.textPrefill).setVisibility(isController ? View.VISIBLE : View.GONE);
+            ll2.findViewById(R.id.btn_error).setVisibility(isController ? View.VISIBLE : View.GONE);
+            ll2.findViewById(R.id.btn_make_photo).setVisibility(isController ? View.VISIBLE : View.GONE);
 
 
             final Button btnErr = ll2.findViewById(R.id.btn_error);
@@ -702,7 +793,7 @@ public class FormFilling extends AppCompatActivity {
         ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
 
         prefillQuestion((TextView) ll2.findViewById(R.id.textPrefill), q_id);
-        if (controller && !type.equals(tagPhoto)) {
+        if (isController && !type.equals(tagPhoto)) {
             countErrors((Button) ll2.findViewById(R.id.btn_error), q_id, ll2);
         }
 
@@ -962,7 +1053,7 @@ public class FormFilling extends AppCompatActivity {
                         }
                         if (answerP.length() > 0 && answersPrefill.optJSONObject(i).has(tagCreatedBy)) {
                             text.setVisibility(View.VISIBLE);
-                            text.setText(prefillFullName + " " + getString(R.string.filled) + ": " + answerP);
+                            text.setText(answersPrefill.optJSONObject(i).optString(tagFullname) + " " + getString(R.string.filled) + ": " + answerP);
                             return;
                         }
                     }
@@ -1018,7 +1109,7 @@ public class FormFilling extends AppCompatActivity {
                     result &= isPageFilled(tmp.optJSONObject(i));
                 }
             } else {
-                if (!controller && group.optInt("only_controller") == 1) {
+                if (!isController && group.optInt("only_controller") == 1) {
                     return true;
                 }
 
@@ -1078,7 +1169,6 @@ public class FormFilling extends AppCompatActivity {
 
     private void countErrors(Button btn, int id_q, LinearLayout ll) {
         try {
-
             if (errorAnswers != null) {
 
                 for (int i = 0; i < errorAnswers.length(); i++) {
@@ -1092,13 +1182,10 @@ public class FormFilling extends AppCompatActivity {
                             for (int j = 0; j < errors.length(); j++) {
                                 if (errors.optJSONObject(j).optInt(tagVirtual) == 1) {
                                     virtual = true;
-                                    continue;
-                                }
-                                if (errors.optJSONObject(j).optInt(tagIdGroup, -1) == -1) {
-                                    manual = true;
+                                    break;
                                 }
                             }
-                            if (virtual && manual) {
+                            if (virtual) {
                                 btn.setText(errors.length() - 1 + "x ");
                                 ll.setBackgroundResource(R.color.lightred);
                             } else {
@@ -1122,51 +1209,55 @@ public class FormFilling extends AppCompatActivity {
         }
     }
 
-    private Pair<Integer, Integer> countGroupErrors(JSONObject group) {
+    private Pair<JSONArray, Integer> countGroupErrors(JSONArray errorArray, JSONObject group) {
+        JSONArray tmp = new JSONArray();
+        int counterReal = 0;
         try {
-            if (errorAnswers != null && errorAnswers.length() > 0) {
+            if (errorArray != null && errorArray.length() > 0) {
                 if (group.has(tagIdQuestion)) {
                     int id_que = group.optInt(tagIdQuestion);
-                    for (int i = 0; i < errorAnswers.length(); i++) {
-                        int countErrInGroup = 0;
-                        int countRepaired = 0;
-                        if (errorAnswers.optJSONObject(i).optInt(tagIdQuestion) == id_que) {
-                            JSONArray errors = errorAnswers.optJSONObject(i).optJSONArray(tagErrors);
+                    for (int i = 0; i < errorArray.length(); i++) {
+                        if (errorArray.optJSONObject(i).optInt(tagIdQuestion) == id_que) {
+                            JSONArray errors = errorArray.optJSONObject(i).optJSONArray(tagErrors);
+                            boolean virtual = false;
                             for (int j = 0; j < errors.length(); j++) {
-                                countErrInGroup++;
-                                if (errors.optJSONObject(j).optInt("resolved_by", -1) > -1) {
-                                    countRepaired++;
+                                if (errors.optJSONObject(j).optInt(tagVirtual) == 1) {
+                                    virtual = true;
                                 }
+                                tmp.put(errors.opt(j));
                             }
-                            return new Pair<>(countErrInGroup, countRepaired);
+                            counterReal = tmp.length();
+                            if (virtual && errors.length() > 1) counterReal--;
+                            return new Pair(tmp, counterReal);
                         }
                     }
                 } else {
-                    int countErrInGroup = 0;
-                    int countRepaired = 0;
                     JSONArray questions = group.optJSONArray(tagQuestions);
                     for (int z = 0; z < questions.length(); z++) {
                         int id_que = questions.optJSONObject(z).optInt(tagIdQuestion);
-                        for (int i = 0; i < errorAnswers.length(); i++) {
+                        for (int i = 0; i < errorArray.length(); i++) {
 
-                            if (errorAnswers.optJSONObject(i).optInt(tagIdQuestion) == id_que) {
-                                JSONArray errors = errorAnswers.optJSONObject(i).optJSONArray(tagErrors);
+                            if (errorArray.optJSONObject(i).optInt(tagIdQuestion) == id_que) {
+                                JSONArray errors = errorArray.optJSONObject(i).optJSONArray(tagErrors);
+                                boolean virtual = false;
                                 for (int j = 0; j < errors.length(); j++) {
-                                    countErrInGroup++;
-                                    if (errors.optJSONObject(j).optInt("resolved_by", -1) > -1) {
-                                        countRepaired++;
+                                    if (errors.optJSONObject(j).optInt(tagVirtual) == 1) {
+                                        virtual = true;
                                     }
+                                    tmp.put(errors.opt(j));
                                 }
+                                counterReal += errors.length();
+                                if (virtual && errors.length() > 1) counterReal--;
                             }
                         }
                     }
-                    return new Pair<>(countErrInGroup, countRepaired);
+                    return new Pair(tmp, counterReal);
                 }
             }
         } catch (Exception e) {
             Functions.err(e);
         }
-        return new Pair<>(0, 0);
+        return new Pair(tmp, counterReal);
     }
 
     /////////////////////////////////////////NETWORK///////////////////////////////////////////////
@@ -1178,6 +1269,7 @@ public class FormFilling extends AppCompatActivity {
             public void onResult(String response) {
                 if (response != null) {
                     try {
+
                         JSONObject tmp = new JSONObject(response);
                         answersPrefill = new JSONArray();
                         prefillFullName = tmp.optString(tagFullname);
@@ -1185,14 +1277,37 @@ public class FormFilling extends AppCompatActivity {
 
                         if (tmp.has(tagAnswers)) {
                             answersPrefill = new JSONObject(response).optJSONArray(tagAnswers);
-                            answers = controller ? tmp.optJSONArray(tagAnswers) : new JSONArray();
+                            answers = new JSONArray();
+                            for (int i = 0; i < answersPrefill.length(); i++) {
+                                if ((answersPrefill.optJSONObject(i).optInt("is_controller") == 1) ==
+                                        isController)
+                                    answers.put(new JSONObject(answersPrefill.optJSONObject(i).toString()));
+                            }
+                            ;
 
                             if (tmp.has(tagErrors) && errorAnswers.length() == 0) {
                                 JSONArray errors = tmp.optJSONArray(tagErrors);
+
                                 for (int i = 0; i < errors.length(); i++) {
                                     JSONObject error = errors.optJSONObject(i);
-                                    if (controller) {
 
+                                    if (error.optInt("resolved_by", -1) == -1) {
+                                        hasUnsolvedErrors = true;
+                                    } else {
+                                        //ADD solved error
+                                        error = new JSONObject(error.toString());
+                                        dialogVirtErr = new ErrorDialog(FormFilling.this, error.optInt(tagIdQuestion), errorAnswersSolved, errorCodesArraySolved);
+                                        dialogVirtErr.id_pr_err = error.optInt(tagIdError);
+                                        if (error.optInt(tagIdGroup) == -1) {
+                                            dialogVirtErr.addError(error.optString(tagType).equals(tagPhoto) ? error.optString(tagAnswer) : error.optString(tagManual), error.optString(tagType).equals(tagPhoto),
+                                                    error.optInt(tagIdError), error.optInt(tagIdError) == -2, error.optString("resolved_by", ""));
+                                        } else {
+                                            dialogVirtErr.putAnswer(error.optInt(tagIdError), error.optInt(tagIdGroup),
+                                                    error.optString(tagType), error.optString(tagAnswer), error.optString(tagManual), error.optInt(tagVirtual), error.optString("resolved_by", ""));
+                                        }
+                                    }
+
+                                    if (isController || error.optInt("is_virtual") == 1) {
                                         dialogVirtErr = new ErrorDialog(FormFilling.this, error.optInt(tagIdQuestion), errorAnswers, errorCodesArray);
                                         dialogVirtErr.id_pr_err = error.optInt(tagIdError);
                                         if (error.optInt(tagIdGroup) == -1) {
@@ -1204,15 +1319,16 @@ public class FormFilling extends AppCompatActivity {
                                         }
                                     }
 
-                                    if (error.optInt("resolved_by", -1) == -1)
-                                        hasUnsolvedErrors = true;
+
                                 }
                             }
-                            if (!controller && hasUnsolvedErrors) {
+                            if (!isController && hasUnsolvedErrors && tmp.optInt("uncomplete") != 1) {
 
                                 Functions.toast(FormFilling.this, R.string.first_finish_errors);
                                 if (mWaitDialog != null)
                                     mWaitDialog.cancel();
+                                isFinishing = true;
+                                new FileMan(FormFilling.this, "").removeFolder("PAUSE");
                                 finish();
                                 return;
                             }
@@ -1287,6 +1403,8 @@ public class FormFilling extends AppCompatActivity {
                 .setCancelable(false)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        isFinishing = true;
+                        new FileMan(FormFilling.this, "").removeFolder("PAUSE");
                         FormFilling.this.finish();
                     }
                 }).create().show();

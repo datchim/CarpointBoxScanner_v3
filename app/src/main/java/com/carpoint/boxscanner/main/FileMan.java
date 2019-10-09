@@ -114,6 +114,31 @@ public class FileMan {
 			Functions.err(e);
 		}
 	}
+	public void remove(String name) {
+		try {
+			File f = new File(database, name);
+			if (f.exists())
+				f.delete();
+		} catch (Exception e) {
+			Functions.err(e);
+		}
+	}
+	public void removeFolder(String folder) {
+		try {
+			File f = new File(database+"/"+folder);
+			if (f.exists())
+				deleteRecursive(f);
+		} catch (Exception e) {
+			Functions.err(e);
+		}
+	}
+	void deleteRecursive(File fileOrDirectory) {
+		if (fileOrDirectory.isDirectory())
+			for (File child : fileOrDirectory.listFiles())
+				deleteRecursive(child);
+
+		Log.e("aa",""+fileOrDirectory.delete());
+	}
 
 	public String getDoc(String name) {
 		try {

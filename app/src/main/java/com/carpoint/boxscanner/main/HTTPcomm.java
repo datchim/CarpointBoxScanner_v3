@@ -154,7 +154,6 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                     writeText(os, "login", customer.toString());
                     writeText(os, "photo", photo.toString());
 
-
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
                 break;
 
