@@ -39,12 +39,16 @@
             android:text="@string/nfc_write"
             android:textSize="@dimen/dvacet" />
 
-        <View
+        <TextView
+            android:id="@+id/text_version"
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="0.1">
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_weight="0.1"
+            android:textColor="@color/grey"
+            android:textSize="@dimen/patnact">
 
-        </View>
+        </TextView>
         <Button
             android:id="@+id/login"
             android:layout_width="wrap_content"

@@ -59,10 +59,10 @@ import java.util.Date;
 public class FormFilling extends AppCompatActivity {
 
     public static final String tagIdPlan = "id_plan", tagIdQuestion = "id_question", tagIdGroup = "id_group", tagPlans = "plans", tagLogin = "LOGIN", tagControler = "is_controller", tagName = "name", tagDrawDate = "draw_date",
-            tagError = "ERROR", tagErrors = "errors", tagQuestionsGroups = "questions_groups", tagSerial = "serial", tagFullname = "fullname", tagAnswers = "answers", tagAnswer = "answer",
+            tagError = "ERROR", tagErrors = "errors", tagQuestionsGroups = "questions_groups", tagSerial = "serial", tagFullname = "fullname", tagAnswers = "answers",tagAnswers2 = "answers2", tagAnswer = "answer",
             tagLastQ = "last_question", tagQuestions = "questions", tagType = "type", tagIdError = "id_error", tagCmnError = "common_id_errors", tagYesNo = "yesno", tagYes = "yes", tagPhoto = "photo",
             tagText = "text", tagNumber = "number", tagNumberYes = "numberyes", tagPhotoReq = "photo_required", tagPositiveAnswer = "1", tagNegativeAnswer = "0", tagNaAnswer = "-1", tagLocLat = "loc_lat", tagLocLng = "loc_lng",
-            tagLimitPlus = "limit_plus", tagLimitMinus = "limit_minus", tagIdLastProto = "id_last_protocol", tagVirtual = "is_virtual", tagManual = "manual_text", tagNone = "none", tagUncomplete = "uncomplete",
+            tagLimitPlus = "limit_plus", tagLimitMinus = "limit_minus", tagIdLastProto = "id_last_protocol", tagVirtual = "is_virtual", tagManual = "manual_text", tagNone = "", tagUncomplete = "uncomplete",
             MIME_TEXT_PLAIN = "text/plain", tagCreatedBy = "created_by", tagIsUniversal = "is_universal";
 
     private AlertDialog mWaitDialog;
@@ -79,7 +79,7 @@ public class FormFilling extends AppCompatActivity {
     private JSONArray answers, errorCodesArray, errorAnswers, answersPrefill, errorCodesArraySolved, errorAnswersSolved;
     private JSONArray questionGroups;
 
-    private Button btnSend, btnNext, btnClear, btnSaveUncomplete, btnMenu;
+    private Button btnSend, btnNext, btnClear, btnMenu;
 
     private SignatureView signatureView;
     private Bitmap bitmapSign, bitmap;
@@ -107,7 +107,6 @@ public class FormFilling extends AppCompatActivity {
                 (actionbar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
-        btnSaveUncomplete = (Button) findViewById(R.id.btn_ic_save);
 
         btnSend = (Button) findViewById(R.id.btnSend);
         btnMenu = (Button) findViewById(R.id.btnMenu);
@@ -301,14 +300,6 @@ public class FormFilling extends AppCompatActivity {
                 } catch (Exception e) {
                     Functions.err(e);
                 }
-            }
-        });
-
-
-        btnSaveUncomplete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                confirmDialog(true);
             }
         });
 
@@ -562,7 +553,6 @@ public class FormFilling extends AppCompatActivity {
         try {
             llQuestions.removeAllViews();
 
-            btnSaveUncomplete.setVisibility((actualLayout > 0 && actualLayout != layoutCount) ? View.VISIBLE : View.INVISIBLE);
 
             if (actualLayout == 0)
                 ((TextView) findViewById(R.id.action_bar_title)).setText(R.string.title_activity_scanning);
@@ -1081,7 +1071,7 @@ public class FormFilling extends AppCompatActivity {
                     editAnswer.setTextColor(getResources().getColor(R.color.red, getResources().newTheme()));
                     if (isErr) {
                         dialog = new ErrorDialog(FormFilling.this, q.optInt(tagIdQuestion), errorAnswers, errorCodesArray);
-                        dialog.addError(q.optString(actualLang, "") + " - " + FormFilling.this.getString(R.string.out_of_limit), false, -2, true);
+                        dialog.addError(q.optString(actualLang, "") + " - " + FormFilling.this.getString(R.string.out_of_limit)+": "+s, false, -2, true);
                     }
                 } else {
                     text.setTextColor(getResources().getColor(R.color.black, getResources().newTheme()));
@@ -1275,6 +1265,9 @@ public class FormFilling extends AppCompatActivity {
                         prefillFullName = tmp.optString(tagFullname);
                         boolean hasUnsolvedErrors = false;
 
+                        if (tmp.has(tagAnswers2)) {
+                            answersPrefill = new JSONObject(response).optJSONArray(tagAnswers2);
+                        }
                         if (tmp.has(tagAnswers)) {
                             answersPrefill = new JSONObject(response).optJSONArray(tagAnswers);
                             answers = new JSONArray();
@@ -1318,11 +1311,10 @@ public class FormFilling extends AppCompatActivity {
                                                     error.optString(tagType), error.optString(tagAnswer), error.optString(tagManual), error.optInt(tagVirtual), error.optString("resolved_by", ""));
                                         }
                                     }
-
-
                                 }
                             }
-                            if (!isController && hasUnsolvedErrors && tmp.optInt("uncomplete") != 1) {
+
+                          /*  if (!isController && hasUnsolvedErrors && tmp.optInt("uncomplete") != 1 && !(tmp.optInt("id_protocol_solved") >0)) {
 
                                 Functions.toast(FormFilling.this, R.string.first_finish_errors);
                                 if (mWaitDialog != null)
@@ -1331,11 +1323,22 @@ public class FormFilling extends AppCompatActivity {
                                 new FileMan(FormFilling.this, "").removeFolder("PAUSE");
                                 finish();
                                 return;
-                            }
+                            }*/
                             if (tmp.has(tagIdLastProto))
                                 idLastProtocol = tmp.optInt(tagIdLastProto);
                             Functions.toast(FormFilling.this, R.string.protocol_downloaded);
                             refresh();
+                            if(tmp.optInt("status")==1){
+                                AlertDialog alertDialog = new AlertDialog.Builder(FormFilling.this).create();
+                                alertDialog.setMessage(getString(R.string.paletReleased));
+                                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                alertDialog.show();
+                            }
                         }
                         if (mWaitDialog != null)
                             mWaitDialog.dismiss();

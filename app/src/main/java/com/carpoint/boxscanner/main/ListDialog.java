@@ -50,7 +50,7 @@ public class ListDialog {
     private LinearLayout llProtocols, llHead;
     private Activity mActivity;
     private String actualLang = MainActivity.language, item, username;
-    private boolean showSign, showAll, isAdmin;
+    private boolean showSign, isAdmin;
     private Bitmap bitmapSign;
     private SignatureView signatureView;
     private LinearLayout.LayoutParams buttonParams;
@@ -354,7 +354,6 @@ public class ListDialog {
                     ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s/%s", obj.optString(FormFilling.tagName), obj.optString(FormFilling.tagSerial)));
 
                     if (item.equals(MainActivity.tagUncompleteProto)) {
-                        if (obj.optInt(MainActivity.tagUncomplete) == 1) {
                             llProtocols.addView(ll);
                             Button bt = (Button) mActivity.getLayoutInflater().inflate(R.layout.item_button, llProtocols, false);
                             bt.setText(R.string.further);
@@ -374,7 +373,6 @@ public class ListDialog {
                             });
 
                             llProtocols.addView(bt);
-                        }
                     } else {
                         llProtocols.addView(ll);
                         if (obj.has(FormFilling.tagErrors)) {
@@ -387,52 +385,6 @@ public class ListDialog {
                     }
                 }
             }
-
-            final Button bt = (Button) dialog.findViewById(R.id.btn_show_all);
-            bt.setText(R.string.showAll);
-            bt.setVisibility(item.equals(tagErrorList) && !showAll ? View.VISIBLE : View.GONE);
-            bt.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        final AlertDialog mWaitDownloadDialog = new AlertDialog.Builder(mActivity)
-                                .setView(mActivity.getLayoutInflater().inflate(R.layout.wait_download, null))
-                                .setNegativeButton(R.string.cancel,
-                                        new DialogInterface.OnClickListener() {
-
-                                            @Override
-                                            public void onClick(DialogInterface dialog,
-                                                                int which) {
-                                                if (dialog != null)
-                                                    dialog.cancel();
-                                            }
-                                        }).create();
-                        mWaitDownloadDialog.setCancelable(false);
-                        mWaitDownloadDialog.show();
-
-                        new HTTPcomm(mActivity, new HTTPcomm.OnFinish() {
-                            @Override
-                            public void onResult(String response) {
-                                if (response != null) {
-                                    try {
-                                        showAll = true;
-                                        mWaitDownloadDialog.dismiss();
-                                        bt.setVisibility(View.GONE);
-                                        JSONObject tmp = new JSONObject(response);
-                                        mProtocols = tmp.getJSONArray(MainActivity.tagProtocols);
-
-                                        refreshProtocol("", "");
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        }, item, true);
-                    } catch (Exception e) {
-                        Functions.err(e);
-                    }
-                }
-            });
 
         } catch (Exception e) {
             Functions.err(e);

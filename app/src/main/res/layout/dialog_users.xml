@@ -1,0 +1,62 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/dvacetPet"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dvacet"
+        android:text="@string/login"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/dvacetDva"
+        android:textColor="@color/black"/>
+
+    <com.carpoint.boxscanner.main.CustomAutoCompleteTextView
+        android:id="@+id/autocompletetextview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/Preferences_Carpoint_partners_Username"
+        android:textSize="@dimen/dvacetDva" />
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dvacetDva"
+        android:inputType="textPassword"
+        android:hint="@string/Preferences_Carpoint_partners_Password"
+        android:textSize="@dimen/dvacetDva" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/deset"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/patnact"
+            android:text="@string/cancel"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/dvacetDva" />
+        <Button
+            android:id="@+id/btn_ok"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/patnact"
+            android:text="@string/ok"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/dvacetDva" />
+
+
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

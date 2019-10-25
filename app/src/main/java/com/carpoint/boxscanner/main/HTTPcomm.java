@@ -39,7 +39,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
     public HTTPcomm(Context context, OnFinish onFinish, String item,boolean showAll ) {
         mContext = context;
         this.onFinish = onFinish;
-        this.showAll = showAll;
+        this.showAll = true;
 
         switch (item){
             case "questions":
@@ -49,12 +49,11 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                 endUrl ="getProtoErrorList";
                 break;
             case "errorList2":
-                this.showAll = false;
                 this.onlyBlocked = true;
                 endUrl ="getProtoErrorList";
                 break;
             case "uncompleteProtocols":
-                endUrl ="getUncompleteList";
+                endUrl ="getUncompleteList2";
                 break;
             case "getUserList":
                 endUrl ="getUserList";
@@ -140,10 +139,10 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                     break;
                 case "getQuestions":
                 case "getUserList":
-                case "getUncompleteList":
+                case "getUncompleteList2":
                     writeText(os, "login", customer.toString());
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
-                break;
+                    break;
 
                 case "getPhoto":
                     isPhoto = true;
@@ -155,20 +154,21 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                     writeText(os, "photo", photo.toString());
 
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
-                break;
+                    break;
 
                 case "getProtocol":
                     writeText(os, "login", customer.toString());
                     writeText(os, "ids", params[0].toString());
+                    writeText(os, "by_group", true+"");
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
-                break;
+                    break;
 
                 case "resolveError":
                     writeText(os, "login", customer.toString());
                     writeText(os, "errors", params[0].toString());
                     writeBitmap(os, "sign", (Bitmap)params[1], 100);
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
-                break;
+                    break;
 
                 case "sendProtocol":
                     JSONObject head  = (JSONObject)params[0];
@@ -194,7 +194,7 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
                     Bitmap sign = (Bitmap) params[5];
                     writeBitmap(os, "sign",sign, 100);
                     os.write((delimiter + boundary + delimiter + "\r\n").getBytes());
-                 break;
+                    break;
             }
 
             // Get data
@@ -279,71 +279,71 @@ public class HTTPcomm extends AsyncTask<Object, Boolean, Object> {
     protected void onPostExecute(Object result) {
         super.onPostExecute(result);
 
-            switch (endUrl){
-                case "getProtoErrorList":
-                case "getProtocol":
-                case "getUserList":
-                case "resolveError":
-                case "getUncompleteList":
-                    try {
-                        if (onFinish != null)
-                            onFinish.onResult((String)result);
-                    } catch (Exception e) {
-                        Functions.toast(mContext,R.string.error);
-                        Functions.err(e);
-                    }
-                    break;
+        switch (endUrl){
+            case "getProtoErrorList":
+            case "getProtocol":
+            case "getUserList":
+            case "resolveError":
+            case "getUncompleteList2":
+                try {
+                    if (onFinish != null)
+                        onFinish.onResult((String)result);
+                } catch (Exception e) {
+                    Functions.toast(mContext,R.string.error);
+                    Functions.err(e);
+                }
+                break;
 
-               case "getQuestions":
-                   try {
-                       if (result != null) {
-                           try {
-                               JSONObject o = new JSONObject((String)result);
-                               Functions.toast(mContext, R.string.questionsDownloaded);
-                               FileMan file = new FileMan(mContext, "");
-                               file.saveDoc("questions.json", o);
-                           } catch (JSONException e) {
-                               Functions.toast(mContext, R.string.msg_error_hhtp);
-                           }
-                       }
-
-                       if (onFinish != null)
-                           onFinish.onResult((String)result);
-                   } catch (Exception e) {
-                       Functions.toast(mContext, R.string.msg_error_hhtp);
-                   }
-                   break;
-
-                case "getPhoto":
-                    try {
-                        if (onFinishBitmap != null)
-                            onFinishBitmap.onResult((Bitmap)result);
-                    } catch (Exception e) {
-                        Functions.toast(mContext,R.string.error);
-                        Functions.err(e);
-                    }
-                    break;
-
-                case "sendProtocol":
-                    try {
-
-                        if (result != null) {
-                            JSONObject obj = new JSONObject((String)result);
-                            String tmp = obj.optString("status","");
-                            if (onFinish != null)
-                                onFinish.onResult(tmp);
-                        } else {
-                            if (onFinish != null)
-                                onFinish.onResult(null);
+            case "getQuestions":
+                try {
+                    if (result != null) {
+                        try {
+                            JSONObject o = new JSONObject((String)result);
+                            Functions.toast(mContext, R.string.questionsDownloaded);
+                            FileMan file = new FileMan(mContext, "");
+                            file.saveDoc("questions.json", o);
+                        } catch (JSONException e) {
+                            Functions.toast(mContext, R.string.msg_error_hhtp);
                         }
+                    }
 
-                    } catch (Exception e) {
-                        Functions.err(e);
+                    if (onFinish != null)
+                        onFinish.onResult((String)result);
+                } catch (Exception e) {
+                    Functions.toast(mContext, R.string.msg_error_hhtp);
+                }
+                break;
+
+            case "getPhoto":
+                try {
+                    if (onFinishBitmap != null)
+                        onFinishBitmap.onResult((Bitmap)result);
+                } catch (Exception e) {
+                    Functions.toast(mContext,R.string.error);
+                    Functions.err(e);
+                }
+                break;
+
+            case "sendProtocol":
+                try {
+
+                    if (result != null) {
+                        JSONObject obj = new JSONObject((String)result);
+                        String tmp = obj.optString("status","");
+                        if (onFinish != null)
+                            onFinish.onResult(tmp);
+                    } else {
                         if (onFinish != null)
                             onFinish.onResult(null);
                     }
-                    break ;
-            }
+
+                } catch (Exception e) {
+                    Functions.err(e);
+                    if (onFinish != null)
+                        onFinish.onResult(null);
+                }
+                break ;
+        }
     }
 
     public interface OnFinish {

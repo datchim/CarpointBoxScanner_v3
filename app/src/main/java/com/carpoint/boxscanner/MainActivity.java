@@ -8,10 +8,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.location.Location;
+import android.location.LocationManager;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -49,6 +52,7 @@ import com.carpoint.boxscanner.main.UserDialog;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -91,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
                     String url = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("url_preference", "");
                     String name = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString(CARPOINT_fullname, "");
-                    if(name.length() == 0){
+                    if (name.length() == 0) {
                         Functions.toast(MainActivity.this, R.string.settup);
                         return;
                     }
@@ -110,11 +114,11 @@ public class MainActivity extends AppCompatActivity {
                         new HTTPcomm(MainActivity.this, new HTTPcomm.OnFinish() {
                             @Override
                             public void onResult(String response) {
-                                if (response != null) {
+                               /* if (response != null) {
                                     Intent intent = new Intent(MainActivity.this, FormFilling.class);
                                     intent.putExtra("json", response);
                                     startActivity(intent);
-                                }
+                                }*/
                             }
                         }, tagQuestions, false);
                     }
@@ -146,9 +150,9 @@ public class MainActivity extends AppCompatActivity {
             login.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(getPrefs(MainActivity.this).getString(CARPOINT_fullname, "").length() ==0){
+                    if (getPrefs(MainActivity.this).getString(CARPOINT_fullname, "").length() == 0) {
                         downloadList(tagUserList);
-                    }else{
+                    } else {
                         SharedPreferences.Editor pEditor = getPrefs(MainActivity.this).edit();
                         pEditor.remove(CARPOINT_username);
                         pEditor.remove(CARPOINT_fullname);
@@ -230,6 +234,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            ((TextView) findViewById(R.id.text_version)).setText("v." + pInfo.versionCode);
+
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
                     && !checkPermissionsGranted())
                 return;
@@ -256,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
         refresh();
     }
 
-    public void refresh(){
+    public void refresh() {
         try {
             if (performSend && Functions.checkInternetEnable(MainActivity.this)) {
                 performSend = false;
@@ -331,7 +338,8 @@ public class MainActivity extends AppCompatActivity {
                             protocols = tmp.getJSONArray(tagProtocols);
 
                             listDialog = new ListDialog();
-                            listDialog.showDialog(MainActivity.this, protocols, item, tmp.optBoolean("is_admin"), tmp.optJSONArray("places"));
+                            listDialog.showDialog(MainActivity.this, protocols, item, tmp.optBoolean("is_admin"),
+                                    tmp.optJSONArray("places"));
 
                         }
                     }
@@ -344,8 +352,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @SuppressLint("MissingPermission")
     public void refreshErrors(final String item) {
         try {
+
             //Download notify
             new HTTPcomm(MainActivity.this, new HTTPcomm.OnFinish() {
                 @Override
@@ -358,26 +368,69 @@ public class MainActivity extends AppCompatActivity {
                             JSONObject tmp = new JSONObject(response);
                             JSONArray protocols = tmp.getJSONArray(tagProtocols);
 
+                            JSONArray places = tmp.getJSONArray("places");
+
+                            LocationManager mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                            Location last = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                            double lat = 0, lng = 0;
+                            if (last == null)
+                                last = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+                            if (last != null) {
+                                lat = last.getLatitude();
+                                lng = last.getLongitude();
+                            }
+                            double min = Integer.MAX_VALUE;
+                            int index = -1, selectedPlace = -1;
+                            for (int i = 0; i < places.length(); i++) {
+                                double tmpD = Math.abs(places.optJSONObject(i).optDouble("loc_lat") - lat)
+                                        + Math.abs(places.optJSONObject(i).optDouble("loc_lng") - lng);
+                                if (tmpD < min) {
+                                    min = tmpD;
+                                    index = i;
+                                }
+                            }
+                            if (index > -1) {
+
+                                selectedPlace = places.optJSONObject(index).optInt("id_place");
+                            }
+
                             int countErr = 0;
                             int countUncomplete = 0;
 
                             for (int i = 0; i < protocols.length(); i++) {
-                                if (item.startsWith(tagErrorList)) {
-                                    if (protocols.optJSONObject(i).optString(tagUsername, "").equals(username)) {
-                                        JSONArray errors = protocols.optJSONObject(i).optJSONArray(tagErrors);
-                                        countErr += errors.length();
+                                if (selectedPlace > -1) {
 
-                                        for (int j = 0; j < errors.length(); j++) {
-                                            if (errors.optJSONObject(j).optInt("is_virtual") == 1) {
-                                                countErr= findManuals(errors, errors.optJSONObject(j), errors.optJSONObject(j).optInt("id_question"), countErr);
+                                    double latP = protocols.optJSONObject(i).optDouble("loc_lat", 0);
+                                    double lngP = protocols.optJSONObject(i).optDouble("loc_lng", 0);
+                                    if (latP != 0) {
+                                        min = Integer.MAX_VALUE;
+                                        int id_min = -1;
+                                        for (int j = 0; j < places.length(); j++) {
+
+                                            double tmpD = Math.abs(latP - places.optJSONObject(j).optDouble("loc_lat", 0))
+                                                    + Math.abs(lngP - places.optJSONObject(j).optDouble("loc_lng", 0));
+                                            if (tmpD < min) {
+                                                min = tmpD;
+                                                id_min = places.optJSONObject(j).optInt("id_place");
                                             }
+                                        }
+                                        if (id_min != selectedPlace) {
+                                            continue;
+                                        }
+                                    }
+                                }
+
+                                if (item.startsWith(tagErrorList)) {
+                                    JSONArray errors = protocols.optJSONObject(i).optJSONArray(tagErrors);
+                                    countErr += errors.length();
+
+                                    for (int j = 0; j < errors.length(); j++) {
+                                        if (errors.optJSONObject(j).optInt("is_virtual") == 1) {
+                                            countErr = findManuals(errors, errors.optJSONObject(j), errors.optJSONObject(j).optInt("id_question"), countErr);
                                         }
                                     }
                                 } else {
-                                    if (protocols.optJSONObject(i).optString(tagUsername, "").equals(username) &&
-                                            protocols.optJSONObject(i).optInt(tagUncomplete) == 1) {
-                                        countUncomplete += 1;
-                                    }
+                                    countUncomplete += 1;
                                 }
                             }
 
@@ -391,7 +444,7 @@ public class MainActivity extends AppCompatActivity {
                                 } else {
                                     textErr.setText("");
                                 }
-                            }else if (item.equals(tagErrorList2)) {
+                            } else if (item.equals(tagErrorList2)) {
                                 if (countErr > 0) {
                                     textErr2.setText(getString(R.string.youHave) + " " + countErr + " " + getString(R.string.errors));
                                 } else {
@@ -414,6 +467,7 @@ public class MainActivity extends AppCompatActivity {
             Functions.err(e);
         }
     }
+
     private int findManuals(JSONArray errors, JSONObject virtual, int id_q, int count) {
         try {
             for (int i = 0; i < errors.length(); i++) {
@@ -440,11 +494,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             MainActivity.this.setTitle(MainActivity.this.getString(R.string.not_logged_in));
         }
-        if(login != null){
+        if (login != null) {
 
-            if(getPrefs(MainActivity.this).getString(CARPOINT_fullname, "").length() ==0){
+            if (getPrefs(MainActivity.this).getString(CARPOINT_fullname, "").length() == 0) {
                 login.setText(R.string.login);
-            }else{
+            } else {
                 login.setText(R.string.logout);
             }
         }
@@ -496,7 +550,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void login(){
+    public void login() {
         new FileMan(MainActivity.this, "").remove("questions.json");
         if (Functions.checkInternetEnable(MainActivity.this)) {
             new HTTPcomm(this, null, tagQuestions, false);

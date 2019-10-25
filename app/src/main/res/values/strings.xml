@@ -153,7 +153,7 @@
     <string name="errors">errors!</string>
     <string name="filled">filled</string>
     <string name="quickSearch">Quick search (B3)</string>
-    <string name="uncompleted_protocols">Uncompleted protocols</string>
+    <string name="uncompleted_protocols">Not released protocols</string>
     <string name="uncomplete">Uncomplete</string>
     <string name="protocols">protocols!</string>
     <string name="block">Block</string>
@@ -173,6 +173,7 @@
     <string name="state">State</string>
     <string name="wrong">Wrong</string>
     <string name="repaired">Repaired</string>
+    <string name="paletReleased">This pallet is already released</string>
     <string name="menu">Menu</string>
     <string name="not_logged_in">Not logged in</string>
     <string name="resolved">Resolved</string>

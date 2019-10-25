@@ -79,7 +79,7 @@
     <string name="filled">gefüllt</string>
     <string name="quickSearch">Schnellsuche (B3)</string>
     <string name="showAll">Zeige alles</string>
-    <string name="uncompleted_protocols">Unvollständige Protokolle</string>
+    <string name="uncompleted_protocols">Nicht freigegebene Protokolle</string>
     <string name="uncomplete">Unvollständige</string>
     <string name="protocols">Protokoll(e)!</string>
     <string name="block">Blockieren</string>

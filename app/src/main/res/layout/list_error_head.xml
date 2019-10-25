@@ -75,12 +75,5 @@
         android:layout_margin="10dp"
         android:text="@string/search"
         android:textAppearance="?android:attr/textAppearanceLarge"/>
-    <Button
-        android:id="@+id/btn_show_all"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="@string/showAll"
-        android:textAppearance="?android:attr/textAppearanceLarge"/>
 
 </LinearLayout>

@@ -80,7 +80,7 @@
     <string name="filled">vyplnil</string>
     <string name="quickSearch">Rychlé hledání (B3)</string>
     <string name="showAll">Zobrazit vše</string>
-    <string name="uncompleted_protocols">Nedokončené protokoly</string>
+    <string name="uncompleted_protocols">Neuvolněné protokoly</string>
     <string name="uncomplete">Nedokončené</string>
     <string name="protocols">protokol(y)!</string>
     <string name="block">Zablokovat</string>
@@ -103,4 +103,5 @@
     <string name="youWereLoggedOut">Byl jste odhlášen</string>
     <string name="list_of_errors2">Blokované chyby</string>
     <string name="first_finish_errors">Před vytvořením nového protokolu musíte vyřešit chyby.</string>
+    <string name="paletReleased">Tato paleta je již uvolněná!</string>
 </resources>
