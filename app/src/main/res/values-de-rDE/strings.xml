@@ -47,7 +47,7 @@
     <string name="add_error">Fehler hinzufügen</string>
     <string name="msg_no_error_codes">Keine Fehlercodes gefunden</string>
     <string name="btn_add_error">Weitere Fehler hinzutun</string>
-    <string name="error_add_title">Add new error</string>
+    <string name="error_add_title">Neuen Fehler hinzufügen</string>
     <string name="another_errors">Weitere Fehler</string>
     <string name="product_have_error">Produkt muss fehlerfrei sein</string>
     <string name="protocol_not_found">Protocol was not found.</string>
@@ -100,4 +100,5 @@
     <string name="youWereLoggedOut">You were logged out</string>
     <string name="first_finish_errors">Sie müssen zuerst die Fehler beheben, bevor Sie ein neues Protokoll erstellen können.</string>
     <string name="unrelease">Nicht freigegeben</string>
+    <string name="error_to_solve">Zu lösende Fehler:</string>
 </resources>

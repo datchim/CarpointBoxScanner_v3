@@ -210,10 +210,10 @@ public class ErrorDialog {
             ((TextView) ll.findViewById(R.id.text)).setText(group.optString(actualLang, ""));
         }
 
-        if(group.optInt("resolved_by", -1) > -1){
+        /*if(group.optInt("resolved_by", -1) > -1){
             ll.setBackgroundResource(R.color.lightgreen);
             ((TextView) ll.findViewById(R.id.text)).append("\n"+mActivity.getString(R.string.repaired));
-        }
+        }*/
 
         if (showCommon && common) llErrors.addView(ll);
         if (!common) llErrors.addView(ll);
@@ -243,19 +243,26 @@ public class ErrorDialog {
         });
 
         String answer = getAnswer(errID,q_id);
-
-        if (answer.equals("1")||answer.contains("err_photo")) {
-            chk.setChecked(true);
+        if (isErrorResolved(errID,q_id)/* && group.optInt("is_virtual")==0*/)  {
+            ll.setBackgroundResource(R.color.lightgreen);
+            ((TextView) ll.findViewById(R.id.text)).append("\n"+mActivity.getString(R.string.repaired));
             btnMakePhoto.setVisibility(View.GONE);
+            chk.setVisibility(View.GONE);
         }else{
-
-            if (photoRequired) {
-                chk.setVisibility(View.GONE);
-
-            } else {
+            if (answer.equals("1")||answer.contains("err_photo")) {
+                chk.setChecked(true);
                 btnMakePhoto.setVisibility(View.GONE);
+            }else{
+
+                if (photoRequired) {
+                    chk.setVisibility(View.GONE);
+
+                } else {
+                    btnMakePhoto.setVisibility(View.GONE);
+                }
             }
         }
+
 
         chk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -281,7 +288,6 @@ public class ErrorDialog {
                 }
             }
         });
-
     }
 
     /////////////////////////////////////////INNER LOGIC///////////////////////////////////////////////
@@ -306,6 +312,26 @@ public class ErrorDialog {
             Functions.err(e);
         }
         return "";
+    }
+    public boolean isErrorResolved(int id_err, int q_id) {
+        JSONArray errArray = new JSONArray();
+        try {
+            for (int i = 0; i < errorAnswers.length(); i++) {
+                if (errorAnswers.optJSONObject(i).optInt("id_question") == q_id)
+                    errArray = errorAnswers.optJSONObject(i).optJSONArray("errors");
+
+                for (int x = 0; x < errArray.length(); x++) {
+                    errArray.optJSONObject(x);
+                    if ((errArray.optJSONObject(x).optInt("id_error") == id_err) && (errArray.optJSONObject(x).has("resolved_by"))) {
+
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Functions.err(e);
+        }
+        return false;
     }
 
     public void putAnswer(int id_error, int id_group, String type, String answer, String manual, int virtual) {

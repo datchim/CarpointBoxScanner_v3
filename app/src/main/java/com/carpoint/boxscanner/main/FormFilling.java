@@ -87,7 +87,7 @@ public class FormFilling extends AppCompatActivity {
 
     private ArrayList<Pair<Integer, Bitmap>> photos = new ArrayList<>();
     private ArrayList<Pair<String, Bitmap>> photosErr = new ArrayList<>();
-
+    private ArrayList<Pair<JSONArray, Bitmap>> errorToSolve = new ArrayList<>();
     private LocationListener mLocationListener;
 
     private int photo_id_q, photo_id_g, selectedPlanIndex = -1;
@@ -624,10 +624,10 @@ public class FormFilling extends AppCompatActivity {
     private void displayList() {
         try {
             boolean isAllOk = true;
-
+            Log.e("errors", errorAnswers.toString());
             getLayoutInflater().inflate(R.layout.item_signposthead, llQuestions, true);
             for (int i = 0; i < questionGroups.length(); i++) {
-                JSONObject question = questionGroups.optJSONObject(i);
+                final JSONObject question = questionGroups.optJSONObject(i);
                 if (!isController && question.optInt("only_controller") == 1) {
                     continue;
                 }
@@ -637,10 +637,12 @@ public class FormFilling extends AppCompatActivity {
                 Button btnQuNa = ((Button) ll.findViewById(R.id.question_name));
 
                 TextView state = ((TextView) ll.findViewById(R.id.state));
-                int counterr = countGroupErrors(errorAnswers, questionGroups.optJSONObject(i)).second;
+                Button btnErr = ll.findViewById(R.id.btn_error);
+                TextView txtErrCount = ll.findViewById(R.id.cout_err);
+                int counter = countGroupErrors(errorAnswers, questionGroups.optJSONObject(i)).second;
                 final Pair<JSONArray, Integer> counterrSolved = countGroupErrors(errorAnswersSolved, questionGroups.optJSONObject(i));
 
-                if (isPageFilled(questionGroups.getJSONObject(i)) && counterr == 0) {
+                if (isPageFilled(questionGroups.getJSONObject(i)) && counter == 0) {
                     state.setText(R.string.state_ok);
                     state.setBackgroundColor(Color.GREEN);
 
@@ -648,11 +650,22 @@ public class FormFilling extends AppCompatActivity {
                     if (isAllOk) isAllOk = false;
                 }
 
-                if (counterr > 0) {
+                if (counter > 0) {
                     state.setText(R.string.state_nok);
                     state.setBackgroundColor(Color.RED);
+                    txtErrCount.setVisibility(View.GONE);
+                    btnErr.setText(String.valueOf(counter));
+                    btnErr.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            RepairErrorDialog rDialog = new RepairErrorDialog();
+                            rDialog.showDialog(FormFilling.this,errorCodesArray, errorAnswers, errorCodesArraySolved, errorAnswersSolved , question.optJSONArray(tagQuestions), errorToSolve);
+                        }
+                    });
+                }else{
+                    btnErr.setVisibility(View.GONE);
                 }
-                ((TextView) ll.findViewById(R.id.cout_err)).setText(String.valueOf(counterr));
+
                 TextView repa = (TextView) ll.findViewById(R.id.cout_repaired);
                 repa.setText(String.valueOf(counterrSolved.second));
                 repa.setOnClickListener(new View.OnClickListener() {
@@ -694,6 +707,8 @@ public class FormFilling extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     putAnswer(-3, -3, tagYesNo, tagNegativeAnswer, true);
+                    Log.e("resolved_errors",errorAnswersSolved.toString());
+                    Log.e("resolved_errors - count",String.valueOf(errorAnswersSolved.length()));
                     actualLayout = layoutCount;
                     refresh();
                 }
@@ -1118,7 +1133,6 @@ public class FormFilling extends AppCompatActivity {
 
     private String getAnswer(int id_q) {
         try {
-
             for (int i = 0; i < answers.length(); i++) {
                 if (answers.optJSONObject(i).optInt(tagIdQuestion) == id_q)
                     return answers.optJSONObject(i).optString(tagAnswer);
@@ -1276,7 +1290,7 @@ public class FormFilling extends AppCompatActivity {
                                         isController)
                                     answers.put(new JSONObject(answersPrefill.optJSONObject(i).toString()));
                             }
-                            ;
+
 
                             if (tmp.has(tagErrors) && errorAnswers.length() == 0) {
                                 JSONArray errors = tmp.optJSONArray(tagErrors);
@@ -1290,6 +1304,7 @@ public class FormFilling extends AppCompatActivity {
                                         //ADD solved error
                                         error = new JSONObject(error.toString());
                                         dialogVirtErr = new ErrorDialog(FormFilling.this, error.optInt(tagIdQuestion), errorAnswersSolved, errorCodesArraySolved);
+                                     //   dialogVirtErr = new ErrorDialog(FormFilling.this, error.optInt(tagIdQuestion), errorAnswers, errorCodesArray);
                                         dialogVirtErr.id_pr_err = error.optInt(tagIdError);
                                         if (error.optInt(tagIdGroup) == -1) {
                                             dialogVirtErr.addError(error.optString(tagType).equals(tagPhoto) ? error.optString(tagAnswer) : error.optString(tagManual), error.optString(tagType).equals(tagPhoto),
@@ -1311,6 +1326,8 @@ public class FormFilling extends AppCompatActivity {
                                                     error.optString(tagType), error.optString(tagAnswer), error.optString(tagManual), error.optInt(tagVirtual), error.optString("resolved_by", ""));
                                         }
                                     }
+
+
                                 }
                             }
 
@@ -1388,6 +1405,20 @@ public class FormFilling extends AppCompatActivity {
             Functions.err(e);
         }
     }
+
+    /*private void sendResolvedErors(Bitmap bitmapSign){
+        new HTTPcomm(FormFilling.this, ids, bitmapSign, new HTTPcomm.OnFinish() {
+            @Override
+            public void onResult(String response) {
+                if (response != null) {
+                    Functions.toast(FormFilling.this, R.string.success);
+                }
+
+                mWaitDialog.dismiss();
+
+            }
+        });
+    }*/
 
     /////////////////////////////////////////DIALOGS///////////////////////////////////////////////
 

@@ -177,4 +177,5 @@
     <string name="menu">Menu</string>
     <string name="not_logged_in">Not logged in</string>
     <string name="resolved">Resolved</string>
+    <string name="error_to_solve">Errors to solve:</string>
 </resources>

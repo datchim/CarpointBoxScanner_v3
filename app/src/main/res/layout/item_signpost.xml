@@ -34,7 +34,7 @@
         <TextView
             android:id="@+id/state"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:padding="@dimen/pet"
@@ -50,22 +50,31 @@
         <TextView
             android:id="@+id/cout_err"
             android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:visibility="visible"
+            android:gravity="center"
+            android:text="0"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/patnact" />
+        <Button
+            android:id="@+id/btn_error"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="@dimen/pet"
+            android:layout_marginEnd="@dimen/pet"
+            android:visibility="visible"
             android:gravity="center"
             android:text="0"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/patnact" />
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="@color/black" />
 
         <TextView
             android:id="@+id/cout_repaired"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:text="0"

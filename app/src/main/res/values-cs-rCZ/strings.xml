@@ -47,7 +47,7 @@
     <string name="add_error">Přidat chybu</string>
     <string name="msg_no_error_codes">Nebyly nalezeny chybové kódy</string>
     <string name="btn_add_error">Přidat další chybu</string>
-    <string name="error_add_title">Add new error</string>
+    <string name="error_add_title">Přidat novou chybu</string>
     <string name="another_errors">Další chyby</string>
     <string name="product_have_error">Produkt musí být bez chyb</string>
     <string name="protocol_not_found">Protocol was not found.</string>
@@ -104,4 +104,5 @@
     <string name="list_of_errors2">Blokované chyby</string>
     <string name="first_finish_errors">Před vytvořením nového protokolu musíte vyřešit chyby.</string>
     <string name="paletReleased">Tato paleta je již uvolněná!</string>
+    <string name="error_to_solve">Chyby k vyřešení:</string>
 </resources>

@@ -129,7 +129,7 @@ public class ListDialog {
 
                 LocationManager mLocationManager = (LocationManager) mActivity.getSystemService(Context.LOCATION_SERVICE);
                 Location last = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                if(last == null)
+                if (last == null)
                     last = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
                 if (last != null) {
                     double lat = last.getLatitude();
@@ -138,22 +138,22 @@ public class ListDialog {
                     int index = -1;
                     for (int i = 0; i < places.length(); i++) {
                         double tmp = Math.abs(places.optJSONObject(i).optDouble("loc_lat") - lat)
-                                + Math.abs(places.optJSONObject(i).optDouble("loc_lng") - lng) ;
+                                + Math.abs(places.optJSONObject(i).optDouble("loc_lng") - lng);
                         if (tmp < min) {
                             min = tmp;
                             index = i;
                         }
                     }
-                    if(index > -1){
+                    if (index > -1) {
 
                         selectedPlace = ListDialog.this.places.optJSONObject(index);
                     }
-                        autoCompletePlace.setSelection(index);
-                }else{
+                    autoCompletePlace.setSelection(index);
+                } else {
                     autoCompletePlace.setSelection(0);
                     selectedPlace = ListDialog.this.places.optJSONObject(0);
                 }
-            }else{
+            } else {
                 llHead.findViewById(R.id.llPlace).setVisibility(View.GONE);
             }
 
@@ -349,31 +349,34 @@ public class ListDialog {
                 //if (!obj.optString(MainActivity.tagUsername).equals(username) && !showAll) continue;
                 if ((obj.optString(FormFilling.tagName).contains(nameProtocol)) && (serialProtocol.length() == 0 ||
                         (obj.optString(FormFilling.tagSerial).equals(serialProtocol)))) {
-                    LinearLayout ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_head, llProtocols, false);
-
-                    ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s/%s", obj.optString(FormFilling.tagName), obj.optString(FormFilling.tagSerial)));
 
                     if (item.equals(MainActivity.tagUncompleteProto)) {
-                            llProtocols.addView(ll);
-                            Button bt = (Button) mActivity.getLayoutInflater().inflate(R.layout.item_button, llProtocols, false);
-                            bt.setText(R.string.further);
-                            bt.setLayoutParams(buttonParams);
 
-                            bt.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(mActivity.getApplicationContext(), FormFilling.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    intent.putExtra(FormFilling.tagType, obj.optString(FormFilling.tagName));
-                                    intent.putExtra(FormFilling.tagSerial, obj.optString(FormFilling.tagSerial));
-                                    intent.putExtra(FormFilling.tagIdPlan, obj.optInt(FormFilling.tagIdPlan));
-                                    mActivity.startActivity(intent);
-                                    dialog.dismiss();
-                                }
-                            });
+                        LinearLayout ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_list, llProtocols, false);
+                        ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s/%s", obj.optString(FormFilling.tagName), obj.optString(FormFilling.tagSerial)));
+                        Button bt = ll.findViewById(R.id.btn_list);
+                        bt.setText(R.string.further);
+                        bt.setLayoutParams(buttonParams);
 
-                            llProtocols.addView(bt);
+                        bt.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(mActivity.getApplicationContext(), FormFilling.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra(FormFilling.tagType, obj.optString(FormFilling.tagName));
+                                intent.putExtra(FormFilling.tagSerial, obj.optString(FormFilling.tagSerial));
+                                intent.putExtra(FormFilling.tagIdPlan, obj.optInt(FormFilling.tagIdPlan));
+                                mActivity.startActivity(intent);
+                                dialog.dismiss();
+                            }
+                        });
+                        if (obj.optInt(MainActivity.tagUncomplete)==0) ll.setBackgroundResource(R.color.lightgreen);
+
+                        llProtocols.addView(ll);
                     } else {
+                        LinearLayout ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_head, llProtocols, false);
+
+                        ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s/%s", obj.optString(FormFilling.tagName), obj.optString(FormFilling.tagSerial)));
                         llProtocols.addView(ll);
                         if (obj.has(FormFilling.tagErrors)) {
                             JSONArray errors = obj.optJSONArray(FormFilling.tagErrors);
