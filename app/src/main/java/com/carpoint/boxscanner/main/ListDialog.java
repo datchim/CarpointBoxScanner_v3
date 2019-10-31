@@ -370,8 +370,8 @@ public class ListDialog {
                                 dialog.dismiss();
                             }
                         });
-                        if (obj.optInt(MainActivity.tagUncomplete)==0) ll.setBackgroundResource(R.color.lightgreen);
 
+                        if (!obj.optBoolean("has_unsolved_errors")) ll.setBackgroundResource(R.color.lightgreen);
                         llProtocols.addView(ll);
                     } else {
                         LinearLayout ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_head, llProtocols, false);

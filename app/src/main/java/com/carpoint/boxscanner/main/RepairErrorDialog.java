@@ -56,10 +56,12 @@ public class RepairErrorDialog {
     private Bitmap bitmapSign;
     private SignatureView signatureView;
     private LinearLayout.LayoutParams buttonParams;
+    public RepairErrorDialog(){
+        
+    }
 
 
-
-    public void showDialog(final Activity activity, JSONArray errorCodes, JSONArray errorAnswers,  JSONArray errorCodesArraySolved, JSONArray errorAnswersSolved,JSONArray questions, ArrayList<Pair<JSONArray, Bitmap>> errorToSolve) {
+    public void showDialog(final Activity activity, JSONArray errorCodes, JSONArray errorAnswers,  JSONArray errorCodesArraySolved, JSONArray errorAnswersSolved,JSONArray questions) {
         try {
             mActivity = activity;
             String temp = errorAnswers.toString();
@@ -84,17 +86,6 @@ public class RepairErrorDialog {
             lWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setAttributes(lWindowParams);
 
-            btnBack.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.dismiss();
-                    errors = originalErrors;
-                    Log.e("errorsOriginal", originalErrors.toString() );
-                    Log.e("errorsModified", errors.toString() );
-                    ((FormFilling) mActivity).refresh();
-                    dialog.dismiss();
-                }
-            });
 
             btnSave.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -102,10 +93,6 @@ public class RepairErrorDialog {
                     try {
                         String temp = errors.toString();
                         originalErrors = new JSONArray(temp);
-
-
-                        Log.e("errorsOriginal", originalErrors.toString() );
-                        Log.e("errorsModified", errors.toString() );
                         ((FormFilling) mActivity).refresh();
                         dialog.dismiss();
                     } catch (Exception e) {
@@ -147,7 +134,9 @@ public class RepairErrorDialog {
         }
     }
 
+
     private void showError(final JSONArray errors){
+
         for (int i = 0; i < errors.length(); i++){
             final JSONObject error = errors.optJSONObject(i);
             if (error.optInt("resolved_by",0)>0 || error.optInt("resolved_by",0)==-2){
@@ -184,10 +173,12 @@ public class RepairErrorDialog {
                             error.put("resolved_by", -2);
                             if (error.optInt(FormFilling.tagIdGroup) == -1) {
                                 dialogVirtErr.addError(error.optString(FormFilling.tagType).equals(FormFilling.tagPhoto) ? error.optString(FormFilling.tagAnswer) : error.optString(FormFilling.tagManual), error.optString(FormFilling.tagType).equals(FormFilling.tagPhoto),
-                                        error.optInt(FormFilling.tagIdError), error.optInt(FormFilling.tagIdError) == -2, error.optString("resolved_by", ""));
+                                        error.optInt(FormFilling.tagIdError), error.optInt(FormFilling.tagIdError) == -2, error.optString("resolved_by", "")
+                                        ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
                             } else {
                                 dialogVirtErr.putAnswer(error.optInt(FormFilling.tagIdError), error.optInt(FormFilling.tagIdGroup),
-                                        error.optString(FormFilling.tagType), error.optString(FormFilling.tagAnswer), error.optString(FormFilling.tagManual), error.optInt(FormFilling.tagVirtual), error.optString("resolved_by", ""));
+                                        error.optString(FormFilling.tagType), error.optString(FormFilling.tagAnswer), error.optString(FormFilling.tagManual), error.optInt(FormFilling.tagVirtual), error.optString("resolved_by", "")
+                                        ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
                             }
                         }else {
                             error.remove("resolved_by");
@@ -201,8 +192,6 @@ public class RepairErrorDialog {
                 }
             });
             llErrors.addView(ll);
-
         }
-
     }
 }

@@ -335,9 +335,9 @@ public class ErrorDialog {
     }
 
     public void putAnswer(int id_error, int id_group, String type, String answer, String manual, int virtual) {
-        putAnswer(id_error, id_group, type, answer, manual, virtual, null);
+        putAnswer(id_error, id_group, type, answer, manual, virtual, null, null,null);
     }
-    public void putAnswer(int id_error, int id_group, String type, String answer, String manual, int virtual, String resolved_by) {
+    public void putAnswer(int id_error, int id_group, String type, String answer, String manual, int virtual, String resolved_by,  String resolved_time, String id_photo_sign) {
         try {
             JSONObject tmp = new JSONObject();
             tmp.put("id_error", id_error);
@@ -354,7 +354,8 @@ public class ErrorDialog {
             }
             if(resolved_by != null)
                 tmp.put("resolved_by", resolved_by);
-
+            tmp.put("resolved_time", resolved_time);
+            tmp.put("id_photo_sign", id_photo_sign);
             JSONObject err = new JSONObject();
             err.put("id_question", q_id);
 
@@ -387,10 +388,10 @@ public class ErrorDialog {
     }
 
     public void addError(String text, boolean isPhoto, int downlError, boolean isVirtual) {
-        addError(text,isPhoto,downlError,isVirtual,null);
+        addError(text,isPhoto,downlError,isVirtual,null,null,null);
     }
 
-    public void addError(String text, boolean isPhoto, int downlError, boolean isVirtual, String resolved_by){
+    public void addError(String text, boolean isPhoto, int downlError, boolean isVirtual, String resolved_by, String resolved_time, String id_photo_sign){
 
         try {
             Log.e ("error codes", errorCodes.toString());
@@ -422,16 +423,18 @@ public class ErrorDialog {
             newError.put("id_group", -1);
             newError.put("id_error", errID);
             newError.put("id_question", q_id);
-            if(resolved_by != null)
+            if(resolved_by != null){
                 newError.put("resolved_by", resolved_by);
-
+                newError.put("resolved_time", resolved_time);
+                newError.put("id_photo_sign", id_photo_sign);
+            }
 
             if (isPhoto){
-                putAnswer(errID, -1, "photo", "err_photo_" + q_id + "_" + photoIdError, null,0,resolved_by);
+                putAnswer(errID, -1, "photo", "err_photo_" + q_id + "_" + photoIdError, null,0,resolved_by,resolved_time,id_photo_sign);
                 newError.put("type", "photo");
                 newError.put("photo_required", 1);
             }else{
-                putAnswer(errID, -1, "yesno", "1", text,isVirtual?1:0,resolved_by);
+                putAnswer(errID, -1, "yesno", "1", text,isVirtual?1:0,resolved_by, resolved_time, id_photo_sign);
                 newError.put("is_virtual", isVirtual?1:0);
                 newError.put("type", "yesno");
                 newError.put("lang_cs", text);

@@ -660,6 +660,7 @@ public class FormFilling extends AppCompatActivity {
                         public void onClick(View view) {
                             RepairErrorDialog rDialog = new RepairErrorDialog();
                             rDialog.showDialog(FormFilling.this,errorCodesArray, errorAnswers, errorCodesArraySolved, errorAnswersSolved , question.optJSONArray(tagQuestions), errorToSolve);
+
                         }
                     });
                 }else{
@@ -707,6 +708,7 @@ public class FormFilling extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     putAnswer(-3, -3, tagYesNo, tagNegativeAnswer, true);
+                    Log.e("errors",errorAnswers.toString());
                     Log.e("resolved_errors",errorAnswersSolved.toString());
                     Log.e("resolved_errors - count",String.valueOf(errorAnswersSolved.length()));
                     actualLayout = layoutCount;
@@ -1131,6 +1133,8 @@ public class FormFilling extends AppCompatActivity {
         return result;
     }
 
+
+
     private String getAnswer(int id_q) {
         try {
             for (int i = 0; i < answers.length(); i++) {
@@ -1308,10 +1312,12 @@ public class FormFilling extends AppCompatActivity {
                                         dialogVirtErr.id_pr_err = error.optInt(tagIdError);
                                         if (error.optInt(tagIdGroup) == -1) {
                                             dialogVirtErr.addError(error.optString(tagType).equals(tagPhoto) ? error.optString(tagAnswer) : error.optString(tagManual), error.optString(tagType).equals(tagPhoto),
-                                                    error.optInt(tagIdError), error.optInt(tagIdError) == -2, error.optString("resolved_by", ""));
+                                                    error.optInt(tagIdError), error.optInt(tagIdError) == -2, error.optString("resolved_by", "")
+                                                    ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
                                         } else {
                                             dialogVirtErr.putAnswer(error.optInt(tagIdError), error.optInt(tagIdGroup),
-                                                    error.optString(tagType), error.optString(tagAnswer), error.optString(tagManual), error.optInt(tagVirtual), error.optString("resolved_by", ""));
+                                                    error.optString(tagType), error.optString(tagAnswer), error.optString(tagManual), error.optInt(tagVirtual), error.optString("resolved_by", "")
+                                                    ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
                                         }
                                     }
 
@@ -1320,10 +1326,12 @@ public class FormFilling extends AppCompatActivity {
                                         dialogVirtErr.id_pr_err = error.optInt(tagIdError);
                                         if (error.optInt(tagIdGroup) == -1) {
                                             dialogVirtErr.addError(error.optString(tagType).equals(tagPhoto) ? error.optString(tagAnswer) : error.optString(tagManual), error.optString(tagType).equals(tagPhoto),
-                                                    error.optInt(tagIdError), error.optInt(tagIdError) == -2, error.optString("resolved_by", ""));
+                                                    error.optInt(tagIdError), error.optInt(tagIdError) == -2, error.optString("resolved_by", "")
+                                                    ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
                                         } else {
                                             dialogVirtErr.putAnswer(error.optInt(tagIdError), error.optInt(tagIdGroup),
-                                                    error.optString(tagType), error.optString(tagAnswer), error.optString(tagManual), error.optInt(tagVirtual), error.optString("resolved_by", ""));
+                                                    error.optString(tagType), error.optString(tagAnswer), error.optString(tagManual), error.optInt(tagVirtual), error.optString("resolved_by", "")
+                                                    ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
                                         }
                                     }
 
