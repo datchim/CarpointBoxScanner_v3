@@ -52,17 +52,15 @@ public class RepairErrorDialog {
     private Activity mActivity;
     private String actualLang = MainActivity.language;
     private JSONArray errors, questions,errorCodes, originalErrors, errorCodesArraySolved, errorAnswersSolved;
+    private JSONObject question;
     private boolean showSign;
     private Bitmap bitmapSign;
     private SignatureView signatureView;
     private LinearLayout.LayoutParams buttonParams;
-    public RepairErrorDialog(){
-        
-    }
 
-
-    public void showDialog(final Activity activity, JSONArray errorCodes, JSONArray errorAnswers,  JSONArray errorCodesArraySolved, JSONArray errorAnswersSolved,JSONArray questions) {
+    public RepairErrorDialog(final Activity activity, JSONArray errorCodes, JSONArray errorAnswers,  JSONArray errorCodesArraySolved, JSONArray errorAnswersSolved,JSONArray questions){
         try {
+
             mActivity = activity;
             String temp = errorAnswers.toString();
             this.originalErrors= new JSONArray(temp);
@@ -71,7 +69,31 @@ public class RepairErrorDialog {
             this.errorCodesArraySolved = errorCodesArraySolved;
             this.questions = questions;
             this.errorCodes = errorCodes;
-            dialog = new Dialog(activity);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    public RepairErrorDialog(final Activity activity, JSONArray errorCodes, JSONArray errorAnswers,  JSONArray errorCodesArraySolved, JSONArray errorAnswersSolved,JSONObject question){
+        try {
+
+            mActivity = activity;
+            String temp = errorAnswers.toString();
+            this.originalErrors= new JSONArray(temp);
+            this.errors= errorAnswers;
+            this.errorAnswersSolved = errorAnswersSolved;
+            this.errorCodesArraySolved = errorCodesArraySolved;
+            this.question = question;
+            this.errorCodes = errorCodes;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void showDialog() {
+        try {
+
+            dialog = new Dialog(mActivity);
             dialog.setCancelable(false);
             dialog.setContentView(R.layout.dialog_repair);
 
@@ -122,8 +144,18 @@ public class RepairErrorDialog {
 
     private void refreshErrors(){
         llErrors.removeAllViews();
-        for (int i=0; i<questions.length(); i++){
-            JSONObject question = questions.optJSONObject(i);
+        if (questions!=null){
+            for (int i=0; i<questions.length(); i++){
+                JSONObject question = questions.optJSONObject(i);
+                int q_id = question.optInt(FormFilling.tagIdQuestion);
+                for (int z=0; z<errors.length();z++){
+                    JSONObject error = errors.optJSONObject(z);
+                    if (error.optInt(FormFilling.tagIdQuestion) == q_id){
+                        showError(error.optJSONArray(FormFilling.tagErrors));
+                    }
+                }
+            }
+        }else{
             int q_id = question.optInt(FormFilling.tagIdQuestion);
             for (int z=0; z<errors.length();z++){
                 JSONObject error = errors.optJSONObject(z);

@@ -642,7 +642,7 @@ public class FormFilling extends AppCompatActivity {
                 int counter = countGroupErrors(errorAnswers, questionGroups.optJSONObject(i)).second;
                 final Pair<JSONArray, Integer> counterrSolved = countGroupErrors(errorAnswersSolved, questionGroups.optJSONObject(i));
 
-                if (isPageFilled(questionGroups.getJSONObject(i)) && counter == 0) {
+                if (isPageFilled(questionGroups.getJSONObject(i)) && counterrSolved.second == counter) {
                     state.setText(R.string.state_ok);
                     state.setBackgroundColor(Color.GREEN);
 
@@ -650,7 +650,7 @@ public class FormFilling extends AppCompatActivity {
                     if (isAllOk) isAllOk = false;
                 }
 
-                if (counter > 0) {
+                if ( counterrSolved.second != counter) {
                     state.setText(R.string.state_nok);
                     state.setBackgroundColor(Color.RED);
                     txtErrCount.setVisibility(View.GONE);
@@ -658,13 +658,20 @@ public class FormFilling extends AppCompatActivity {
                     btnErr.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            RepairErrorDialog rDialog = new RepairErrorDialog();
-                            rDialog.showDialog(FormFilling.this,errorCodesArray, errorAnswers, errorCodesArraySolved, errorAnswersSolved , question.optJSONArray(tagQuestions), errorToSolve);
-
+                                if ( question.has(tagQuestions)){
+                                    RepairErrorDialog rDialog = new RepairErrorDialog(FormFilling.this,errorCodesArray, errorAnswers, errorCodesArraySolved, errorAnswersSolved ,
+                                       question.optJSONArray(tagQuestions));
+                                    rDialog.showDialog();
+                                }else{
+                                    RepairErrorDialog rDialog = new RepairErrorDialog(FormFilling.this,errorCodesArray, errorAnswers, errorCodesArraySolved, errorAnswersSolved ,
+                                            question);
+                                    rDialog.showDialog();
+                                }
                         }
                     });
                 }else{
                     btnErr.setVisibility(View.GONE);
+                    txtErrCount.setText((String.valueOf(counter)));
                 }
 
                 TextView repa = (TextView) ll.findViewById(R.id.cout_repaired);
