@@ -59,7 +59,7 @@ import java.util.Date;
 public class FormFilling extends AppCompatActivity {
 
     public static final String tagIdPlan = "id_plan", tagIdQuestion = "id_question", tagIdGroup = "id_group", tagPlans = "plans", tagLogin = "LOGIN", tagControler = "is_controller", tagName = "name", tagDrawDate = "draw_date",
-            tagError = "ERROR", tagErrors = "errors", tagQuestionsGroups = "questions_groups", tagSerial = "serial", tagFullname = "fullname", tagAnswers = "answers",tagAnswers2 = "answers2", tagAnswer = "answer",
+            tagError = "ERROR", tagErrors = "errors", tagQuestionsGroups = "questions_groups", tagSerial = "serial", tagFullname = "fullname", tagAnswers = "answers", tagAnswers2 = "answers2", tagAnswer = "answer",
             tagLastQ = "last_question", tagQuestions = "questions", tagType = "type", tagIdError = "id_error", tagCmnError = "common_id_errors", tagYesNo = "yesno", tagYes = "yes", tagPhoto = "photo",
             tagText = "text", tagNumber = "number", tagNumberYes = "numberyes", tagPhotoReq = "photo_required", tagPositiveAnswer = "1", tagNegativeAnswer = "0", tagNaAnswer = "-1", tagLocLat = "loc_lat", tagLocLng = "loc_lng",
             tagLimitPlus = "limit_plus", tagLimitMinus = "limit_minus", tagIdLastProto = "id_last_protocol", tagVirtual = "is_virtual", tagManual = "manual_text", tagNone = "", tagUncomplete = "uncomplete",
@@ -650,7 +650,7 @@ public class FormFilling extends AppCompatActivity {
                     if (isAllOk) isAllOk = false;
                 }
 
-                if ( counterrSolved.second != counter) {
+                if (counterrSolved.second != counter) {
                     state.setText(R.string.state_nok);
                     state.setBackgroundColor(Color.RED);
                     txtErrCount.setVisibility(View.GONE);
@@ -658,18 +658,18 @@ public class FormFilling extends AppCompatActivity {
                     btnErr.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                                if ( question.has(tagQuestions)){
-                                    RepairErrorDialog rDialog = new RepairErrorDialog(FormFilling.this,errorCodesArray, errorAnswers, errorCodesArraySolved, errorAnswersSolved ,
-                                       question.optJSONArray(tagQuestions));
-                                    rDialog.showDialog();
-                                }else{
-                                    RepairErrorDialog rDialog = new RepairErrorDialog(FormFilling.this,errorCodesArray, errorAnswers, errorCodesArraySolved, errorAnswersSolved ,
-                                            question);
-                                    rDialog.showDialog();
-                                }
+                            if (question.has(tagQuestions)) {
+                                RepairErrorDialog rDialog = new RepairErrorDialog(FormFilling.this, errorCodesArray, errorAnswers, errorCodesArraySolved, errorAnswersSolved,
+                                        question.optJSONArray(tagQuestions));
+                                rDialog.showDialog();
+                            } else {
+                                RepairErrorDialog rDialog = new RepairErrorDialog(FormFilling.this, errorCodesArray, errorAnswers, errorCodesArraySolved, errorAnswersSolved,
+                                        question);
+                                rDialog.showDialog();
+                            }
                         }
                     });
-                }else{
+                } else {
                     btnErr.setVisibility(View.GONE);
                     txtErrCount.setText((String.valueOf(counter)));
                 }
@@ -715,9 +715,9 @@ public class FormFilling extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     putAnswer(-3, -3, tagYesNo, tagNegativeAnswer, true);
-                    Log.e("errors",errorAnswers.toString());
-                    Log.e("resolved_errors",errorAnswersSolved.toString());
-                    Log.e("resolved_errors - count",String.valueOf(errorAnswersSolved.length()));
+                    Log.e("errors", errorAnswers.toString());
+                    Log.e("resolved_errors", errorAnswersSolved.toString());
+                    Log.e("resolved_errors - count", String.valueOf(errorAnswersSolved.length()));
                     actualLayout = layoutCount;
                     refresh();
                 }
@@ -779,7 +779,6 @@ public class FormFilling extends AppCompatActivity {
                 break;
         }
         if (type.equals(tagText) || (type.equals(tagNumber)) || (type.equals(tagYesNo)) || (type.equals(tagNumberYes))) {
-            //  ll2.findViewById(R.id.textPrefill).setVisibility(isController ? View.VISIBLE : View.GONE);
             ll2.findViewById(R.id.btn_error).setVisibility(isController ? View.VISIBLE : View.GONE);
             ll2.findViewById(R.id.btn_make_photo).setVisibility(isController ? View.VISIBLE : View.GONE);
 
@@ -1015,7 +1014,47 @@ public class FormFilling extends AppCompatActivity {
             ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
             llQuestions.addView(ll2);
 
-            Button makePhoto = (Button) findViewById(R.id.btn_make_photo);
+            for (int i = 0; i < photos.size(); i++) {
+                if (photos.get(i).first == q_id) {
+                    ImageView cameraPhoto = (ImageView) ll2.findViewById(R.id.camera_image);
+                    cameraPhoto.setImageBitmap(photos.get(i).second);
+                    break;
+                }
+            }
+            ImageView tmp = ll2.findViewById(R.id.camera_image);
+            tmp.getDrawable();
+            if (tmp.getDrawable()==null) Log.e("img", "null"); else  Log.e("img", "have image");
+            if (idLastProtocol != 0 && !getAnswer(q_id).equals("") && ((ImageView)ll2.findViewById(R.id.camera_image)).getDrawable() == null) {
+
+                final AlertDialog mWaitDownloadDialog = new AlertDialog.Builder(FormFilling.this)
+                        .setView(getLayoutInflater().inflate(R.layout.wait_download, null))
+                        .setNegativeButton(R.string.cancel,
+                                new DialogInterface.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(DialogInterface dialog,
+                                                        int which) {
+                                        if (dialog != null)
+                                            dialog.cancel();
+                                    }
+                                }).create();
+                mWaitDownloadDialog.setCancelable(false);
+                mWaitDownloadDialog.show();
+
+                new HTTPcomm(FormFilling.this, idLastProtocol, getAnswer(q_id), new HTTPcomm.OnFinishBitmap() {
+                    @Override
+                    public void onResult(Bitmap response) {
+                        mWaitDownloadDialog.dismiss();
+                        if (response != null) {
+                            ImageView cameraPhoto = (ImageView) ll2.findViewById(R.id.camera_image);
+                            cameraPhoto.setImageBitmap(response);
+
+                        }
+                    }
+                });
+            }
+
+            Button makePhoto = ll2.findViewById(R.id.btn_make_photo);
             makePhoto.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -1037,13 +1076,8 @@ public class FormFilling extends AppCompatActivity {
                 }
             });
 
-            for (int i = 0; i < photos.size(); i++) {
-                if (photos.get(i).first == q_id) {
-                    ImageView cameraPhoto = (ImageView) ll2.findViewById(R.id.camera_image);
-                    cameraPhoto.setImageBitmap(photos.get(i).second);
-                    break;
-                }
-            }
+
+
         }
     }
 
@@ -1095,7 +1129,7 @@ public class FormFilling extends AppCompatActivity {
                     editAnswer.setTextColor(getResources().getColor(R.color.red, getResources().newTheme()));
                     if (isErr) {
                         dialog = new ErrorDialog(FormFilling.this, q.optInt(tagIdQuestion), errorAnswers, errorCodesArray);
-                        dialog.addError(q.optString(actualLang, "") + " - " + FormFilling.this.getString(R.string.out_of_limit)+": "+s, false, -2, true);
+                        dialog.addError(q.optString(actualLang, "") + " - " + FormFilling.this.getString(R.string.out_of_limit) + ": " + s, false, -2, true);
                     }
                 } else {
                     text.setTextColor(getResources().getColor(R.color.black, getResources().newTheme()));
@@ -1139,7 +1173,6 @@ public class FormFilling extends AppCompatActivity {
         }
         return result;
     }
-
 
 
     private String getAnswer(int id_q) {
@@ -1315,16 +1348,16 @@ public class FormFilling extends AppCompatActivity {
                                         //ADD solved error
                                         error = new JSONObject(error.toString());
                                         dialogVirtErr = new ErrorDialog(FormFilling.this, error.optInt(tagIdQuestion), errorAnswersSolved, errorCodesArraySolved);
-                                     //   dialogVirtErr = new ErrorDialog(FormFilling.this, error.optInt(tagIdQuestion), errorAnswers, errorCodesArray);
+                                        //   dialogVirtErr = new ErrorDialog(FormFilling.this, error.optInt(tagIdQuestion), errorAnswers, errorCodesArray);
                                         dialogVirtErr.id_pr_err = error.optInt(tagIdError);
                                         if (error.optInt(tagIdGroup) == -1) {
                                             dialogVirtErr.addError(error.optString(tagType).equals(tagPhoto) ? error.optString(tagAnswer) : error.optString(tagManual), error.optString(tagType).equals(tagPhoto),
                                                     error.optInt(tagIdError), error.optInt(tagIdError) == -2, error.optString("resolved_by", "")
-                                                    ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
+                                                    , error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
                                         } else {
                                             dialogVirtErr.putAnswer(error.optInt(tagIdError), error.optInt(tagIdGroup),
                                                     error.optString(tagType), error.optString(tagAnswer), error.optString(tagManual), error.optInt(tagVirtual), error.optString("resolved_by", "")
-                                                    ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
+                                                    , error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
                                         }
                                     }
 
@@ -1334,11 +1367,11 @@ public class FormFilling extends AppCompatActivity {
                                         if (error.optInt(tagIdGroup) == -1) {
                                             dialogVirtErr.addError(error.optString(tagType).equals(tagPhoto) ? error.optString(tagAnswer) : error.optString(tagManual), error.optString(tagType).equals(tagPhoto),
                                                     error.optInt(tagIdError), error.optInt(tagIdError) == -2, error.optString("resolved_by", "")
-                                                    ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
+                                                    , error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
                                         } else {
                                             dialogVirtErr.putAnswer(error.optInt(tagIdError), error.optInt(tagIdGroup),
                                                     error.optString(tagType), error.optString(tagAnswer), error.optString(tagManual), error.optInt(tagVirtual), error.optString("resolved_by", "")
-                                                    ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
+                                                    , error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
                                         }
                                     }
 
@@ -1360,7 +1393,7 @@ public class FormFilling extends AppCompatActivity {
                                 idLastProtocol = tmp.optInt(tagIdLastProto);
                             Functions.toast(FormFilling.this, R.string.protocol_downloaded);
                             refresh();
-                            if(tmp.optInt("status")==1){
+                            if (tmp.optInt("status") == 1) {
                                 AlertDialog alertDialog = new AlertDialog.Builder(FormFilling.this).create();
                                 alertDialog.setMessage(getString(R.string.paletReleased));
                                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",

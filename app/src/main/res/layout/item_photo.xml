@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_gravity="center_vertical"
+        android:gravity="center"
         android:layout_marginBottom="@dimen/deset">
         <TextView
             android:id="@+id/text"
@@ -23,8 +24,6 @@
             android:text="@string/photoBox1"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/dvacetDva" />
-
-
 
     </LinearLayout>
 
