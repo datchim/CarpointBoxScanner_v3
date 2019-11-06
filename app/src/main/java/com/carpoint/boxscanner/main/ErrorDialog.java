@@ -322,7 +322,7 @@ public class ErrorDialog {
 
                 for (int x = 0; x < errArray.length(); x++) {
                     errArray.optJSONObject(x);
-                    if ((errArray.optJSONObject(x).optInt("id_error") == id_err) && (errArray.optJSONObject(x).has("resolved_by"))) {
+                    if ((errArray.optJSONObject(x).optInt("id_error") == id_err) && (errArray.optJSONObject(x).optInt("resolved_by",-1)>0 || errArray.optJSONObject(x).optInt("resolved_by",-1)==-2)) {
 
                         return true;
                     }

@@ -385,7 +385,8 @@ public class FormFilling extends AppCompatActivity {
             int idPlan = extras.getInt(tagIdPlan);
 
             JSONArray temp = plans.optJSONArray(tagPlans);
-            for (int i = 1; i < temp.length(); i++) {
+            for (int i = 0; i < temp.length(); i++) {
+                Log.e("id_plan",String.valueOf(temp.optJSONObject(i).optInt(tagIdPlan)));
                 if (temp.optJSONObject(i).optInt(tagIdPlan) == idPlan) {
                     selectedPlanIndex = i;
                     break;
@@ -612,7 +613,6 @@ public class FormFilling extends AppCompatActivity {
             }
 
             llserial2.setVisibility(actualLayout == 0 ? View.VISIBLE : View.GONE);
-
 
             llsign.setVisibility(actualLayout == layoutCount ? View.VISIBLE : View.GONE);
 
