@@ -1267,15 +1267,9 @@ public class FormFilling extends AppCompatActivity {
                     for (int i = 0; i < errorArray.length(); i++) {
                         if (errorArray.optJSONObject(i).optInt(tagIdQuestion) == id_que) {
                             JSONArray errors = errorArray.optJSONObject(i).optJSONArray(tagErrors);
-                            boolean virtual = false;
-                            for (int j = 0; j < errors.length(); j++) {
-                                if (errors.optJSONObject(j).optInt(tagVirtual) == 1) {
-                                    virtual = true;
-                                }
-                                tmp.put(errors.opt(j));
-                            }
-                            counterReal = tmp.length();
-                            if (virtual && errors.length() > 1) counterReal--;
+                            RepairErrorDialog dialog = new RepairErrorDialog();
+                            JSONObject obj = dialog.getGroupedErrors(errors);
+                            counterReal = obj.optBoolean("has_manual") ? 1 :0 + obj.optInt("non_manual_count");
                             return new Pair(tmp, counterReal);
                         }
                     }
@@ -1287,15 +1281,22 @@ public class FormFilling extends AppCompatActivity {
 
                             if (errorArray.optJSONObject(i).optInt(tagIdQuestion) == id_que) {
                                 JSONArray errors = errorArray.optJSONObject(i).optJSONArray(tagErrors);
-                                boolean virtual = false;
-                                for (int j = 0; j < errors.length(); j++) {
-                                    if (errors.optJSONObject(j).optInt(tagVirtual) == 1) {
-                                        virtual = true;
+                                boolean hasManual = false;
+                                int countNonManual = 0;
+                                for (int k = 0; k < errors.length(); k++) {
+
+                                    final JSONObject error = errors.optJSONObject(k);
+                                    if (error.optInt(FormFilling.tagVirtual) == 1 || error.optInt(tagIdError)<0) {
+                                        if (!hasManual) hasManual = true;
                                     }
-                                    tmp.put(errors.opt(j));
+                                    if (error.optInt(FormFilling.tagIdError) > 0) {
+                                        countNonManual++;
+                                    }
+                                    tmp.put(error);
                                 }
-                                counterReal += errors.length();
-                                if (virtual && errors.length() > 1) counterReal--;
+                                counterReal = (hasManual ? 1 : 0) + countNonManual;
+
+                                return new Pair(tmp, counterReal);
                             }
                         }
                     }
@@ -1306,6 +1307,34 @@ public class FormFilling extends AppCompatActivity {
             Functions.err(e);
         }
         return new Pair(tmp, counterReal);
+    }
+
+    public JSONObject getGroupedErrors(final JSONArray errors) {
+        JSONObject obj = new JSONObject();
+        JSONArray arr = new JSONArray();
+        JSONArray others = new JSONArray();
+        boolean hasManual = false;
+        int countNonManual=0;
+        try {
+            for (int i = 0; i < errors.length(); i++) {
+                final JSONObject error = errors.optJSONObject(i);
+                if (error.optInt(FormFilling.tagVirtual) == 1 || error.optInt(tagIdError)<0) {
+                    hasManual = true;
+                }
+
+                if (error.optInt(FormFilling.tagVirtual) == 0 && error.optInt(FormFilling.tagIdError, -1) > 0 && error.optInt("resolved_by", 0) <= 0 && error.optInt("resolved_by", 0) != -2/*&& !obj.has("manual_text")*/) {
+                    others.put(error);
+                    countNonManual++;
+                }
+            }
+            obj.put("errors_to_solve", arr);
+            obj.put("single_errors", others);
+            obj.put("non_manual_count",countNonManual);
+            obj.put("has_manual",hasManual);
+        } catch (Exception e) {
+            Functions.err(e);
+        }
+        return obj;
     }
 
     /////////////////////////////////////////NETWORK///////////////////////////////////////////////
