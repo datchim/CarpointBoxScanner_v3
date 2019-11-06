@@ -168,24 +168,24 @@ public class RepairErrorDialog {
         }
     }
 
-    private JSONObject checkGroup(final JSONArray errors) {
+    public JSONObject checkGroup(final JSONArray errors) {
         JSONObject obj = new JSONObject();
         JSONArray arr = new JSONArray();
         JSONArray others = new JSONArray();
         try {
             for (int i = 0; i < errors.length(); i++) {
                 final JSONObject error = errors.optJSONObject(i);
-                if (error.optInt(FormFilling.tagVirtual) == 1 && error.optInt("resolved_by", 0) <= 0 && !obj.has("virtual_text")  && error.optInt("resolved_by", 0) != -2) {
+                if (error.optInt(FormFilling.tagVirtual) == 1 && error.optInt("resolved_by", 0) <= 0 && !obj.has("virtual_text") && error.optInt("resolved_by", 0) != -2) {
                     obj.put("virtual_text", error.optString(FormFilling.tagManual));
                     arr.put(error.optInt(FormFilling.tagIdError));
                 }
-                if (error.optInt(FormFilling.tagVirtual) == 0 && !error.optString(FormFilling.tagManual, "").equals("null") && !error.optString(FormFilling.tagType).equals(FormFilling.tagPhoto) && error.optInt(FormFilling.tagIdError, -1) < 0 && error.optInt("resolved_by", 0) <= 0  && error.optInt("resolved_by", 0) != -2/*&& !obj.has("manual_text")*/) {
+                if (error.optInt(FormFilling.tagVirtual) == 0 && !error.optString(FormFilling.tagManual, "").equals("null") && !error.optString(FormFilling.tagType).equals(FormFilling.tagPhoto) && error.optInt(FormFilling.tagIdError, -1) < 0 && error.optInt("resolved_by", 0) <= 0 && error.optInt("resolved_by", 0) != -2/*&& !obj.has("manual_text")*/) {
                     if (obj.has("manual_text"))
                         obj.put("manual_text", obj.optString("manual_text", "") + " - " + error.optString(FormFilling.tagManual));
                     else obj.put("manual_text", error.optString(FormFilling.tagManual));
                     arr.put(error.optInt(FormFilling.tagIdError));
                 }
-                if (error.optString(FormFilling.tagType).equals(FormFilling.tagPhoto) && error.optInt("resolved_by", 0) <= 0  && error.optInt("resolved_by", 0) != -2) {
+                if (error.optString(FormFilling.tagType).equals(FormFilling.tagPhoto) && error.optInt("resolved_by", 0) <= 0 && error.optInt("resolved_by", 0) != -2) {
                     if (obj.has("photo_text"))
                         obj.put("photo_text", obj.optString("photo_text", "") + " - " + error.optString(FormFilling.tagAnswer));
                     else obj.put("photo_text", error.optString(FormFilling.tagAnswer));
@@ -203,31 +203,34 @@ public class RepairErrorDialog {
         return obj;
     }
 
-    private void SolveUnsolve (JSONObject group, JSONArray errors, int id_q ,boolean solve){
-        try{
-            ErrorDialog dialogVirtErr = new ErrorDialog(mActivity, id_q, errorAnswersSolved, errorCodesArraySolved);
+    private void SolveUnsolve(JSONObject group, JSONArray errors, int id_q, boolean solve) {
+        try {
 
             JSONArray erorsToSolve = group.optJSONArray("errors_to_solve");
-            for (int i = 0; i<erorsToSolve.length();i++){
+            for (int i = 0; i < erorsToSolve.length(); i++) {
                 int errorToSolve = erorsToSolve.optInt(i);
-                dialogVirtErr.id_pr_err = errorToSolve;
-                for (int x = 0; x<errors.length();x++ ){
+
+                for (int x = 0; x < errors.length(); x++) {
                     JSONObject error = errors.optJSONObject(x);
-                    if (error.optInt(FormFilling.tagIdError)== errorToSolve){
-                        if (solve){
+                    if (error.optInt(FormFilling.tagIdError) == errorToSolve) {
+
+                        final ErrorDialog dialogVirtErr = new ErrorDialog(mActivity, id_q, errorAnswersSolved, errorCodesArraySolved);
+                        dialogVirtErr.id_pr_err = errorToSolve;
+
+                        if (solve) {
                             error.put("resolved_by", -2);
                             dialogVirtErr.addError(error.optString(FormFilling.tagType).equals(FormFilling.tagPhoto) ? error.optString(FormFilling.tagAnswer) : error.optString(FormFilling.tagManual), error.optString(FormFilling.tagType).equals(FormFilling.tagPhoto),
                                     error.optInt(FormFilling.tagIdError), error.optInt(FormFilling.tagIdError) == -2, "-2"
-                                    ,error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
-                            Log.e("errorAnswersSolved", errorAnswersSolved.toString());
-                        }else
-                        error.remove("resolved_by");
-                        dialogVirtErr.removeError(error.optInt(FormFilling.tagIdError),error.optInt(FormFilling.tagIdQuestion));
+                                    , error.optString("resolved_time", ""), error.optString("id_photo_sign", ""));
+                        } else {
+                            error.remove("resolved_by");
+                            dialogVirtErr.removeError(error.optInt(FormFilling.tagIdError), error.optInt(FormFilling.tagIdQuestion));
+                        }
                         break;
                     }
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Functions.err(e);
         }
     }
@@ -236,41 +239,33 @@ public class RepairErrorDialog {
         final int id_q = errors.optJSONObject(0).optInt(FormFilling.tagIdQuestion);
         final JSONObject group = checkGroup(errors);
         LinearLayout ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_error, llErrors, false);
-        if (group.optJSONArray("errors_to_solve").length()>0){
-            ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s%s%s", group.optString("virtual_text") + (group.has("manual_text")&& group.has("virtual_text")? ", ":" "), group.optString("manual_text")+ (group.has("photo_text")&& group.has("manual_text")? ", ":""), group.optString("photo_text")));
-            final CheckBox chk =  ll.findViewById(R.id.checkbox);
+        if (group.optJSONArray("errors_to_solve").length() > 0) {
+            ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s%s%s", group.optString("virtual_text") + (group.has("manual_text") && group.has("virtual_text") ? ", " : " "), group.optString("manual_text") + (group.has("photo_text") && group.has("manual_text") ? ", " : ""), group.optString("photo_text")));
+            final CheckBox chk = ll.findViewById(R.id.checkbox);
 
             chk.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     try {
-                        /*ErrorDialog dialogVirtErr = new ErrorDialog(mActivity, singleError.optInt(FormFilling.tagIdQuestion), errorAnswersSolved, errorCodesArraySolved);
-                        dialogVirtErr.id_pr_err = singleError.optInt(FormFilling.tagIdError);*/
-
-                        if (chk.isChecked()){
-                            SolveUnsolve(group,errors,id_q,true);
-                        }else {
-                            SolveUnsolve(group,errors,id_q,false);
-                            /*singleError.remove("resolved_by");
-                            dialogVirtErr.removeError(singleError.optInt(FormFilling.tagIdError),singleError.optInt(FormFilling.tagIdQuestion));*/
+                        if (chk.isChecked()) {
+                            SolveUnsolve(group, errors, id_q, true);
+                        } else {
+                            SolveUnsolve(group, errors, id_q, false);
                         }
-                        Log.e("errrrrrrrrr", errors.toString());
-
                     } catch (Exception e) {
                         Functions.err(e);
                     }
                 }
             });
-
-
             llErrors.addView(ll);
         }
-        JSONArray single_errors= group.optJSONArray("single_errors");
-        if (single_errors.length()>0){
-            for (int i = 0; i<single_errors.length(); i++){
+
+        JSONArray single_errors = group.optJSONArray("single_errors");
+        if (single_errors.length() > 0) {
+            for (int i = 0; i < single_errors.length(); i++) {
                 LinearLayout ll2 = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_error, llErrors, false);
-                final  JSONObject singleError = single_errors.optJSONObject(i);
-                final CheckBox chk =  ll2.findViewById(R.id.checkbox);
+                final JSONObject singleError = single_errors.optJSONObject(i);
+                final CheckBox chk = ll2.findViewById(R.id.checkbox);
 
                 chk.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -279,37 +274,27 @@ public class RepairErrorDialog {
                             ErrorDialog dialogVirtErr = new ErrorDialog(mActivity, singleError.optInt(FormFilling.tagIdQuestion), errorAnswersSolved, errorCodesArraySolved);
                             dialogVirtErr.id_pr_err = singleError.optInt(FormFilling.tagIdError);
 
-                            if (chk.isChecked()){
-                                if (!singleError.has(FormFilling.tagIdGroup)) singleError.put(FormFilling.tagIdGroup, -1);
+                            if (chk.isChecked()) {
                                 singleError.put("resolved_by", -2);
-                                if (singleError.optInt(FormFilling.tagIdGroup) == -1) {
-                                    dialogVirtErr.addError(singleError.optString(FormFilling.tagType).equals(FormFilling.tagPhoto) ? singleError.optString(FormFilling.tagAnswer) : singleError.optString(FormFilling.tagManual), singleError.optString(FormFilling.tagType).equals(FormFilling.tagPhoto),
-                                            singleError.optInt(FormFilling.tagIdError), singleError.optInt(FormFilling.tagIdError) == -2, singleError.optString("resolved_by", "")
-                                            ,singleError.optString("resolved_time", ""), singleError.optString("id_photo_sign", ""));
-                                } else {
-                                    dialogVirtErr.putAnswer(singleError.optInt(FormFilling.tagIdError), singleError.optInt(FormFilling.tagIdGroup),
-                                            singleError.optString(FormFilling.tagType), singleError.optString(FormFilling.tagAnswer), singleError.optString(FormFilling.tagManual), singleError.optInt(FormFilling.tagVirtual), singleError.optString("resolved_by", "")
-                                            ,singleError.optString("resolved_time", ""), singleError.optString("id_photo_sign", ""));
-                                }
-                            }else {
+                                dialogVirtErr.putAnswer(singleError.optInt(FormFilling.tagIdError), singleError.optInt(FormFilling.tagIdGroup),
+                                        singleError.optString(FormFilling.tagType), singleError.optString(FormFilling.tagAnswer), singleError.optString(FormFilling.tagManual), singleError.optInt(FormFilling.tagVirtual), singleError.optString("resolved_by", "")
+                                        , singleError.optString("resolved_time", ""), singleError.optString("id_photo_sign", ""));
+                            } else {
                                 singleError.remove("resolved_by");
-                                dialogVirtErr.removeError(singleError.optInt(FormFilling.tagIdError),singleError.optInt(FormFilling.tagIdQuestion));
+                                dialogVirtErr.removeError(singleError.optInt(FormFilling.tagIdError), singleError.optInt(FormFilling.tagIdQuestion));
                             }
-                            Log.e("errrrrrrrrr", errors.toString());
-
                         } catch (Exception e) {
                             Functions.err(e);
                         }
                     }
                 });
 
-
-                for (int x = 0; x<errorCodes.length();x++){
+                for (int x = 0; x < errorCodes.length(); x++) {
                     JSONArray errorTepl = errorCodes.optJSONObject(x).optJSONArray(FormFilling.tagErrors);
-                    for (int z = 0; z<errorTepl.length(); z++){
+                    for (int z = 0; z < errorTepl.length(); z++) {
                         JSONObject errorCode = errorTepl.optJSONObject(z);
-                        if (errorCode.optInt(FormFilling.tagIdError)==singleError.optInt(FormFilling.tagIdError)){
-                            ((TextView)ll2.findViewById(R.id.text)).setText(errorCode.optString(actualLang));
+                        if (errorCode.optInt(FormFilling.tagIdError) == singleError.optInt(FormFilling.tagIdError)) {
+                            ((TextView) ll2.findViewById(R.id.text)).setText(errorCode.optString(actualLang));
                             llErrors.addView(ll2);
                             break;
                         }
@@ -317,6 +302,5 @@ public class RepairErrorDialog {
                 }
             }
         }
-
     }
 }
