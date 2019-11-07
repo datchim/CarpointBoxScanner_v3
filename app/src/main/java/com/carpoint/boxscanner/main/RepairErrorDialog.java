@@ -145,7 +145,7 @@ public class RepairErrorDialog {
         }
     }
 
-    public JSONObject getGroupedErrors(final JSONArray errors) {
+    private JSONObject getGroupedErrors(final JSONArray errors) {
         JSONObject obj = new JSONObject();
         JSONArray arr = new JSONArray();
         JSONArray others = new JSONArray();

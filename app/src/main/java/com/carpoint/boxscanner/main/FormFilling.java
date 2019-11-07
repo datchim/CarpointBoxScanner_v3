@@ -850,14 +850,16 @@ public class FormFilling extends AppCompatActivity {
                 @Override
                 public void onSingleClick(View v) {
                     putAnswer(q_id, g_id, type, tagNegativeAnswer, isLast);
+
                     if (type.equals(tagNumberYes)) {
                         editAnswer.setVisibility(View.VISIBLE);
                         editAnswer.setText("");
                     } else {
                         dialogVirtErr = new ErrorDialog(FormFilling.this, q_id, errorAnswers, errorCodesArray);
                         dialogVirtErr.addError(q.optString(actualLang, "") + " - " + (FormFilling.this.getString(R.string.no).toUpperCase()), false, -2, true);
-                        countErrors(btnErr, q_id, ll);
+
                     }
+                    countErrors(btnErr, q_id, ll);
                 }
 
                 @Override
@@ -926,6 +928,7 @@ public class FormFilling extends AppCompatActivity {
                     public void onDoubleClick(View v) {
                         putAnswer(q_id, g_id, type, tagNone, isLast);
                         rg.clearCheck();
+                        countErrors(btnErr, q_id, ll);
                     }
                 });
             }
@@ -1222,28 +1225,27 @@ public class FormFilling extends AppCompatActivity {
                 for (int i = 0; i < errorAnswers.length(); i++) {
                     if (errorAnswers.optJSONObject(i).optInt(tagIdQuestion) == id_q) {
                         JSONArray errors = errorAnswers.optJSONObject(i).optJSONArray(tagErrors);
+                        boolean hasManual = false;
+                        int countNonManual = 0;
+                        if (errors.length() > 0) {
 
-                        if (errors.length() > 1) {
-                            boolean virtual = false;
-                            boolean manual = false;
+                            for (int k = 0; k < errors.length(); k++) {
 
-                            for (int j = 0; j < errors.length(); j++) {
-                                if (errors.optJSONObject(j).optInt(tagVirtual) == 1) {
-                                    virtual = true;
-                                    break;
+                                final JSONObject error = errors.optJSONObject(k);
+                                if (error.optInt(FormFilling.tagVirtual) == 1 || error.optInt(tagIdError)<0) {
+                                    if (!hasManual) hasManual = true;
+                                }
+                                if (error.optInt(FormFilling.tagIdError) > 0) {
+                                    countNonManual++;
                                 }
                             }
-                            if (virtual) {
-                                btn.setText(errors.length() - 1 + "x ");
+                            int counterReal = (hasManual ? 1 : 0) + countNonManual;
+                            if (counterReal>0) {
+                                btn.setText(counterReal + "x ");
                                 ll.setBackgroundResource(R.color.lightred);
-                            } else {
-                                btn.setText(errors.length() + "x ");
-                                ll.setBackgroundResource(R.color.lightred);
-                            }
-                        } else if (errors.length() > 0) {
 
-                            btn.setText(errors.length() + "x ");
-                            ll.setBackgroundResource(R.color.lightred);
+                            }
+
                         } else {
                             btn.setText("");
                             ll.setBackgroundColor(Color.TRANSPARENT);
@@ -1267,9 +1269,21 @@ public class FormFilling extends AppCompatActivity {
                     for (int i = 0; i < errorArray.length(); i++) {
                         if (errorArray.optJSONObject(i).optInt(tagIdQuestion) == id_que) {
                             JSONArray errors = errorArray.optJSONObject(i).optJSONArray(tagErrors);
-                            RepairErrorDialog dialog = new RepairErrorDialog();
-                            JSONObject obj = dialog.getGroupedErrors(errors);
-                            counterReal = obj.optBoolean("has_manual") ? 1 :0 + obj.optInt("non_manual_count");
+                            boolean hasManual = false;
+                            int countNonManual = 0;
+                            for (int k = 0; k < errors.length(); k++) {
+
+                                final JSONObject error = errors.optJSONObject(k);
+                                if (error.optInt(FormFilling.tagVirtual) == 1 || error.optInt(tagIdError)<0) {
+                                    if (!hasManual) hasManual = true;
+                                }
+                                if (error.optInt(FormFilling.tagIdError) > 0) {
+                                    countNonManual++;
+                                }
+                                tmp.put(error);
+                            }
+                            counterReal = (hasManual ? 1 : 0) + countNonManual;
+
                             return new Pair(tmp, counterReal);
                         }
                     }
@@ -1294,9 +1308,9 @@ public class FormFilling extends AppCompatActivity {
                                     }
                                     tmp.put(error);
                                 }
-                                counterReal = (hasManual ? 1 : 0) + countNonManual;
+                                counterReal += (hasManual ? 1 : 0) + countNonManual;
 
-                                return new Pair(tmp, counterReal);
+                                //return new Pair(tmp, counterReal);
                             }
                         }
                     }
@@ -1309,33 +1323,6 @@ public class FormFilling extends AppCompatActivity {
         return new Pair(tmp, counterReal);
     }
 
-    public JSONObject getGroupedErrors(final JSONArray errors) {
-        JSONObject obj = new JSONObject();
-        JSONArray arr = new JSONArray();
-        JSONArray others = new JSONArray();
-        boolean hasManual = false;
-        int countNonManual=0;
-        try {
-            for (int i = 0; i < errors.length(); i++) {
-                final JSONObject error = errors.optJSONObject(i);
-                if (error.optInt(FormFilling.tagVirtual) == 1 || error.optInt(tagIdError)<0) {
-                    hasManual = true;
-                }
-
-                if (error.optInt(FormFilling.tagVirtual) == 0 && error.optInt(FormFilling.tagIdError, -1) > 0 && error.optInt("resolved_by", 0) <= 0 && error.optInt("resolved_by", 0) != -2/*&& !obj.has("manual_text")*/) {
-                    others.put(error);
-                    countNonManual++;
-                }
-            }
-            obj.put("errors_to_solve", arr);
-            obj.put("single_errors", others);
-            obj.put("non_manual_count",countNonManual);
-            obj.put("has_manual",hasManual);
-        } catch (Exception e) {
-            Functions.err(e);
-        }
-        return obj;
-    }
 
     /////////////////////////////////////////NETWORK///////////////////////////////////////////////
 
