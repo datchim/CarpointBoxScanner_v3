@@ -14,7 +14,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="appName">Pallet controller</string>
     <string name="carid">carid</string>
@@ -129,7 +129,7 @@
     <string name="noScenary">Scenary was not found</string>
     <string name="machen_sie_ein_foto">Create photo</string>
     <string name="showPhoto">Show photo</string>
-    <string name="showAll">Show all</string>
+    <string name="showAll" tools:ignore="MissingTranslation">Show all</string>
     <string name="photoError">Photo - error</string>
     <string name="add_error">Add error</string>
     <string name="msg_no_error_codes">No error codes found</string>

@@ -218,7 +218,7 @@ public class ErrorDialog {
         if (showCommon && common) llErrors.addView(ll);
         if (!common) llErrors.addView(ll);
 
-        final CheckBox chk = (CheckBox) ll.findViewById(R.id.checkbox);
+        final CheckBox chk = ll.findViewById(R.id.checkbox);
         final Button btnMakePhoto = ll.findViewById(R.id.btn_make_photo);
 
         if (group.optInt("is_virtual")==1){
@@ -547,7 +547,7 @@ public class ErrorDialog {
             @Override
             public void run() {
                 ScrollView scrollView =
-                        ((ScrollView) dialog.findViewById(R.id.ScrollView));
+                        dialog.findViewById(R.id.ScrollView);
                 if (scrollView != null) scrollView.smoothScrollTo(0, 0);
             }
         }, 100);
@@ -562,7 +562,7 @@ public class ErrorDialog {
         dialogBuilder.setView(dialogView);
 
         dialogBuilder.setTitle(activity.getString(R.string.btn_add_error));
-        final EditText edt = (EditText) dialogView.findViewById(R.id.edit1);
+        final EditText edt = dialogView.findViewById(R.id.edit1);
 
         dialogBuilder.setPositiveButton(activity.getString(R.string.add_error), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {

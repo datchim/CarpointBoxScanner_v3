@@ -15,7 +15,6 @@ import java.util.Arrays;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.nfc.Tag;
 import android.os.Environment;
 import android.util.Log;
 

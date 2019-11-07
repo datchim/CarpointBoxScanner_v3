@@ -1,20 +1,11 @@
 package com.carpoint.boxscanner.main;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
-import android.graphics.Bitmap;
 import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.util.Pair;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -22,13 +13,9 @@ import android.widget.TextView;
 
 import com.carpoint.boxscanner.MainActivity;
 import com.carpoint.boxscanner.R;
-import com.mindorks.paracamera.Camera;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class RepairedDialog {
 

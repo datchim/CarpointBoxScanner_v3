@@ -299,7 +299,7 @@ public class NFCWrite extends AppCompatActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        // Tag writing mode
+        // T writing mode
         handleIntent(intent);
 
     }

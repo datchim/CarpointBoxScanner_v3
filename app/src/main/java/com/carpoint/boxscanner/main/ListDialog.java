@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -29,20 +28,16 @@ import android.widget.Toast;
 
 import com.carpoint.boxscanner.MainActivity;
 import com.carpoint.boxscanner.R;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.kyanogen.signatureview.SignatureView;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 public class ListDialog {
 
-    private static final String tagErrorList = "errorList", tagChecked = "checked", tagPrErrID = "id_pr_err", tagIdProtocol = "id_protocol",
-            tagNull = "null";
+    
     public EditText editType, editSerial;
     public Button btnSearch;
     private JSONArray mProtocols, places;
@@ -77,13 +72,13 @@ public class ListDialog {
             Button btnSave = dialog.findViewById(R.id.btn_save);
             Button btnBack = dialog.findViewById(R.id.btn_back);
 
-            btnSave.setVisibility(item.startsWith(tagErrorList) ? View.VISIBLE : View.GONE);
+            btnSave.setVisibility(item.startsWith(T.tagErrorList) ? View.VISIBLE : View.GONE);
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mActivity);
             username = prefs.getString(MainActivity.CARPOINT_username, "");
 
             llProtocols = dialog.findViewById(R.id.protocols);
-            signatureView = (SignatureView) dialog.findViewById(R.id.signature_view);
+            signatureView = dialog.findViewById(R.id.signature_view);
 
             WindowManager.LayoutParams lWindowParams = new WindowManager.LayoutParams();
             lWindowParams.width = WindowManager.LayoutParams.MATCH_PARENT;
@@ -181,8 +176,8 @@ public class ListDialog {
 
                                 if (errors != null) {
                                     for (int x = 0; x < errors.length(); x++) {
-                                        if (errors.optJSONObject(x).optBoolean(tagChecked, false)) {
-                                            ids.put(errors.optJSONObject(x).optInt(tagPrErrID, -1));
+                                        if (errors.optJSONObject(x).optBoolean(T.tagChecked, false)) {
+                                            ids.put(errors.optJSONObject(x).optInt(T.tagPrErrID, -1));
                                         }
                                     }
                                 }
@@ -229,7 +224,7 @@ public class ListDialog {
                 }
             });
 
-            ((Button) dialog.findViewById(R.id.btnClear)).setOnClickListener(new View.OnClickListener() {
+            dialog.findViewById(R.id.btnClear).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     signatureView.clearCanvas();
@@ -241,8 +236,8 @@ public class ListDialog {
                 for (int i = 0; i < mProtocols.length(); i++) {
                     JSONObject obj = mProtocols.optJSONObject(i);
 
-                    if (obj.has(FormFilling.tagErrors)) {
-                        JSONArray errors = obj.optJSONArray(FormFilling.tagErrors);
+                    if (obj.has(T.tagErrors)) {
+                        JSONArray errors = obj.optJSONArray(T.tagErrors);
 
                         for (int j = 0; j < errors.length(); j++) {
                             if (errors.optJSONObject(j).optInt("is_virtual") == 1) {
@@ -261,7 +256,7 @@ public class ListDialog {
                     refreshProtocol("", "");
 
                     ScrollView scrollView =
-                            ((ScrollView) dialog.findViewById(R.id.ScrollView));
+                            dialog.findViewById(R.id.ScrollView);
                     if (scrollView != null) scrollView.smoothScrollTo(0, 0);
                 }
             });
@@ -280,14 +275,14 @@ public class ListDialog {
 
 
                     errors.optJSONObject(i).put("dont_show", true);
-                    if (errors.optJSONObject(i).optString(FormFilling.tagType, "").equals(FormFilling.tagPhoto)) {
-                        virtual.put(FormFilling.tagType, FormFilling.tagPhoto);
-                        virtual.put(FormFilling.tagAnswer
-                                , errors.optJSONObject(i).optString(FormFilling.tagAnswer, ""));
+                    if (errors.optJSONObject(i).optString(T.tagType, "").equals(T.tagPhoto)) {
+                        virtual.put(T.tagType, T.tagPhoto);
+                        virtual.put(T.tagAnswer
+                                , errors.optJSONObject(i).optString(T.tagAnswer, ""));
 
                     } else {
-                        virtual.put(FormFilling.tagManual, virtual.optString(FormFilling.tagManual, "")
-                                + "\n" + errors.optJSONObject(i).optString(FormFilling.tagManual, ""));
+                        virtual.put(T.tagManual, virtual.optString(T.tagManual, "")
+                                + "\n" + errors.optJSONObject(i).optString(T.tagManual, ""));
                     }
                     if (!virtual.has("others")) virtual.put("others", new JSONArray());
                     virtual.optJSONArray("others").put(errors.optJSONObject(i));
@@ -347,13 +342,13 @@ public class ListDialog {
                 }
 
                 //if (!obj.optString(MainActivity.tagUsername).equals(username) && !showAll) continue;
-                if ((obj.optString(FormFilling.tagName).contains(nameProtocol)) && (serialProtocol.length() == 0 ||
-                        (obj.optString(FormFilling.tagSerial).equals(serialProtocol)))) {
+                if ((obj.optString(T.tagName).contains(nameProtocol)) && (serialProtocol.length() == 0 ||
+                        (obj.optString(T.tagSerial).equals(serialProtocol)))) {
 
                     if (item.equals(MainActivity.tagUncompleteProto)) {
 
                         LinearLayout ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_list, llProtocols, false);
-                        ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s/%s", obj.optString(FormFilling.tagName), obj.optString(FormFilling.tagSerial)));
+                        ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s/%s", obj.optString(T.tagName), obj.optString(T.tagSerial)));
                         Button bt = ll.findViewById(R.id.btn_list);
                         bt.setText(R.string.further);
                         bt.setLayoutParams(buttonParams);
@@ -363,9 +358,9 @@ public class ListDialog {
                             public void onClick(View v) {
                                 Intent intent = new Intent(mActivity.getApplicationContext(), FormFilling.class);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                intent.putExtra(FormFilling.tagType, obj.optString(FormFilling.tagName));
-                                intent.putExtra(FormFilling.tagSerial, obj.optString(FormFilling.tagSerial));
-                                intent.putExtra(FormFilling.tagIdPlan, obj.optInt(FormFilling.tagIdPlan));
+                                intent.putExtra(T.tagType, obj.optString(T.tagName));
+                                intent.putExtra(T.tagSerial, obj.optString(T.tagSerial));
+                                intent.putExtra(T.tagIdPlan, obj.optInt(T.tagIdPlan));
                                 mActivity.startActivity(intent);
                                 dialog.dismiss();
                             }
@@ -376,13 +371,13 @@ public class ListDialog {
                     } else {
                         LinearLayout ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_head, llProtocols, false);
 
-                        ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s/%s", obj.optString(FormFilling.tagName), obj.optString(FormFilling.tagSerial)));
+                        ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s/%s", obj.optString(T.tagName), obj.optString(T.tagSerial)));
                         llProtocols.addView(ll);
-                        if (obj.has(FormFilling.tagErrors)) {
-                            JSONArray errors = obj.optJSONArray(FormFilling.tagErrors);
+                        if (obj.has(T.tagErrors)) {
+                            JSONArray errors = obj.optJSONArray(T.tagErrors);
 
                             for (int x = 0; x < errors.length(); x++) {
-                                displayError(errors.optJSONObject(x), obj.optInt(tagIdProtocol, -1));
+                                displayError(errors.optJSONObject(x), obj.optInt(T.tagIdProtocol, -1));
                             }
                         }
                     }
@@ -399,21 +394,21 @@ public class ListDialog {
         if (group.optBoolean("dont_show")) return;
         LinearLayout ll = null;
 
-        if (group.optString(FormFilling.tagType, "").equals(FormFilling.tagPhoto)) {
+        if (group.optString(T.tagType, "").equals(T.tagPhoto)) {
             ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_error_photo, llProtocols, false);
             String tmp = group.optString(actualLang, "");
-            if (tmp.length() > 0 && !tmp.equals(tagNull)) {
+            if (tmp.length() > 0 && !tmp.equals(T.tagNull)) {
                 ((TextView) ll.findViewById(R.id.text)).setText(group.optString(actualLang, ""));
             } else {
-                tmp = group.optString(FormFilling.tagManual, "");
-                if (tmp.length() > 0 && !tmp.equals(tagNull)) {
+                tmp = group.optString(T.tagManual, "");
+                if (tmp.length() > 0 && !tmp.equals(T.tagNull)) {
                     ((TextView) ll.findViewById(R.id.text)).setText(tmp);
                 } else {
                     ((TextView) ll.findViewById(R.id.text)).setText(R.string.photoError);
                 }
             }
-            final Button show = (Button) ll.findViewById(R.id.btn_make_photo);
-            final ImageView image = (ImageView) ll.findViewById(R.id.camera_image);
+            final Button show = ll.findViewById(R.id.btn_make_photo);
+            final ImageView image = ll.findViewById(R.id.camera_image);
             show.setVisibility(View.VISIBLE);
             show.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -433,7 +428,7 @@ public class ListDialog {
                     mWaitDownloadDialog.setCancelable(false);
                     mWaitDownloadDialog.show();
 
-                    new HTTPcomm(mActivity, id_protocol, group.optString(FormFilling.tagAnswer, ""), new HTTPcomm.OnFinishBitmap() {
+                    new HTTPcomm(mActivity, id_protocol, group.optString(T.tagAnswer, ""), new HTTPcomm.OnFinishBitmap() {
                         @Override
                         public void onResult(Bitmap response) {
                             mWaitDownloadDialog.dismiss();
@@ -448,25 +443,25 @@ public class ListDialog {
             });
         } else {
             ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_error, llProtocols, false);
-            String tmp = group.optString(FormFilling.tagManual, "");
-            if (tmp.length() > 0 && !tmp.equals(tagNull)) {
+            String tmp = group.optString(T.tagManual, "");
+            if (tmp.length() > 0 && !tmp.equals(T.tagNull)) {
                 ((TextView) ll.findViewById(R.id.text)).setText(tmp);
             } else {
                 ((TextView) ll.findViewById(R.id.text)).setText(group.optString(actualLang, ""));
             }
 
         }
-        final CheckBox chk = (CheckBox) ll.findViewById(R.id.checkbox);
+        final CheckBox chk = ll.findViewById(R.id.checkbox);
 
         chk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
-                    group.put(tagChecked, chk.isChecked());
+                    group.put(T.tagChecked, chk.isChecked());
                     if (group.has("others")) {
                         JSONArray others = group.optJSONArray("others");
                         for (int i = 0; i < others.length(); i++) {
-                            others.optJSONObject(i).put(tagChecked, chk.isChecked());
+                            others.optJSONObject(i).put(T.tagChecked, chk.isChecked());
                         }
                     }
                 } catch (Exception e) {

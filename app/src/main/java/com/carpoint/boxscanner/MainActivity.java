@@ -21,12 +21,10 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,18 +45,13 @@ import com.carpoint.boxscanner.main.Functions;
 import com.carpoint.boxscanner.main.HTTPcomm;
 import com.carpoint.boxscanner.main.NFCWrite;
 import com.carpoint.boxscanner.main.PreferencesActivity;
+import com.carpoint.boxscanner.main.T;
 import com.carpoint.boxscanner.main.UserDialog;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -618,7 +611,7 @@ public class MainActivity extends AppCompatActivity {
                 if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
 
                     String type = intent.getType();
-                    if (FormFilling.MIME_TEXT_PLAIN.equals(type)) {
+                    if (T.MIME_TEXT_PLAIN.equals(type)) {
 
                         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
                         Ndef ndef = Ndef.get(tag);
