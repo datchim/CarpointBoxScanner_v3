@@ -686,7 +686,7 @@ public class FormFilling extends AppCompatActivity {
                 llQuestions.addView(ll);
             }
 
-            LinearLayout llBtn = (LinearLayout) getLayoutInflater().inflate(R.layout.item_two_button, llQuestions, false);
+            LinearLayout llBtn = (LinearLayout) getLayoutInflater().inflate(R.layout.form_filling_bottom, llQuestions, false);
 
             Button btnBlock = llBtn.findViewById(R.id.btnMenuBlock);
             Button btnUnrelease = llBtn.findViewById(R.id.btnMenuUnrelease);
@@ -763,7 +763,7 @@ public class FormFilling extends AppCompatActivity {
                 ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question_input, llQuestions, false);
                 break;
             case T.tagPhoto:
-                ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_photo, llQuestions, false);
+                ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question_photo, llQuestions, false);
                 break;
         }
         if (type.equals(T.tagText) || (type.equals(T.tagNumber)) || (type.equals(T.tagYesNo)) || (type.equals(T.tagNumberYes))) {
@@ -1001,7 +1001,7 @@ public class FormFilling extends AppCompatActivity {
         }
 
         if (type.equals(T.tagPhoto)) {
-            ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_photo, llQuestions, false);
+            ll2 = (LinearLayout) getLayoutInflater().inflate(R.layout.item_question_photo, llQuestions, false);
             ((TextView) ll2.findViewById(R.id.text)).setText(q.optString(actualLang, ""));
             llQuestions.addView(ll2);
 
@@ -1148,7 +1148,7 @@ public class FormFilling extends AppCompatActivity {
                     result &= isPageFilled(tmp.optJSONObject(i));
                 }
             } else {
-                if (!isController && group.optInt("only_controller") == 1) {
+                if (!isController && group.optInt(T.tagOnlyController) == 1) {
                     return true;
                 }
 

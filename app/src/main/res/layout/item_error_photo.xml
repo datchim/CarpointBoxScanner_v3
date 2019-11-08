@@ -12,7 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_marginTop="@dimen/deset"
+        android:gravity="center"
+        >
 
         <TextView
             android:id="@+id/text"
@@ -57,6 +59,5 @@
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="@android:color/black"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginTop="8dp"/>
 </LinearLayout>

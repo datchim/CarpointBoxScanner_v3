@@ -3,26 +3,40 @@
     android:id="@+id/layout_list_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/lightgreen">
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="@android:color/black"
         android:layout_marginBottom="8dp"/>
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="match_parent"
-        android:textStyle="bold"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="@dimen/dvacetDva" />
-    <Button
-        android:id="@+id/btn_list"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:orientation="vertical">
-    </Button>
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:text="111test/123456"
+            android:layout_gravity="center_vertical"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/dvacetDva" />
+        <ImageButton
+            android:id="@+id/btn_list"
+            android:layout_width="@dimen/ctyricet"
+            android:layout_height="@dimen/ctyricet"
+            android:background="@drawable/button"
+            android:layout_margin="10dp"
+            android:gravity="end"
+            android:scaleType="fitXY"
+            android:src="@mipmap/ic_continue"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:orientation="vertical">
+        </ImageButton>
+    </LinearLayout>
+
 
 </LinearLayout>

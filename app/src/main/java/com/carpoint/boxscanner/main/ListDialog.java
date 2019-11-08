@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -107,7 +108,7 @@ public class ListDialog {
                 ArrayAdapter<String> adapter =
                         new ArrayAdapter<String>(mActivity,
                                 R.layout.item_auto, placeList);
-                adapter.setDropDownViewResource(R.layout.item_drop);
+                adapter.setDropDownViewResource(R.layout.item_autocomplete_drop);
                 autoCompletePlace.setAdapter(adapter);
 
                 autoCompletePlace.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -349,9 +350,8 @@ public class ListDialog {
 
                         LinearLayout ll = (LinearLayout) mActivity.getLayoutInflater().inflate(R.layout.item_list, llProtocols, false);
                         ((TextView) ll.findViewById(R.id.text)).setText(String.format("%s/%s", obj.optString(T.tagName), obj.optString(T.tagSerial)));
-                        Button bt = ll.findViewById(R.id.btn_list);
-                        bt.setText(R.string.further);
-                        bt.setLayoutParams(buttonParams);
+                        ImageButton bt = ll.findViewById(R.id.btn_list);
+                      //  bt.setLayoutParams(buttonParams);
 
                         bt.setOnClickListener(new View.OnClickListener() {
                             @Override

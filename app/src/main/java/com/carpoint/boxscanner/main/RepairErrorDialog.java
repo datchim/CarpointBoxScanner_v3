@@ -82,7 +82,7 @@ public class RepairErrorDialog {
                     refreshErrors();
 
                     ScrollView scrollView =
-                            ((ScrollView) dialog.findViewById(R.id.ScrollView));
+                            dialog.findViewById(R.id.ScrollView);
                     if (scrollView != null) scrollView.smoothScrollTo(0, 0);
                 }
             });

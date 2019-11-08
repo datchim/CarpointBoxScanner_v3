@@ -6,4 +6,5 @@
     <dimen name="dvacet">20dp</dimen>
     <dimen name="dvacetDva">20dp</dimen>
     <dimen name="dvacetPet">25dp</dimen>
+    <dimen name="ctyricet">40dp</dimen>
 </resources>

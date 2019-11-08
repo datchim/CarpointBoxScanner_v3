@@ -41,6 +41,7 @@ public class T {
             tagPrErrID = "id_pr_err",
             tagIdProtocol = "id_protocol",
             tagNull = "null",
+            tagPosition = "position",
             tagPositiveAnswer = "1",
             tagNegativeAnswer = "0",
             tagNaAnswer = "-1",

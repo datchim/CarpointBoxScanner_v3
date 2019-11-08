@@ -1,5 +1,4 @@
 <resources>
-
     <dimen name="pet">10dp</dimen>
     <dimen name="deset">18dp</dimen>
     <dimen name="patnact">27dp</dimen>
@@ -7,4 +6,5 @@
     <dimen name="dvacet">35dp</dimen>
     <dimen name="dvacetDva">45dp</dimen>
     <dimen name="dvacetPet">50dp</dimen>
+    <dimen name="ctyricet">80dp</dimen>
 </resources>

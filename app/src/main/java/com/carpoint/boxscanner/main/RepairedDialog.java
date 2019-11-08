@@ -52,7 +52,7 @@ public class RepairedDialog {
             btnAdPhoto.setVisibility(View.GONE);
             llErrors = dialog.findViewById(R.id.erros);
 
-            ((EditText) dialog.findViewById(R.id.editSearch)).setVisibility(View.GONE);
+            dialog.findViewById(R.id.editSearch).setVisibility(View.GONE);
 
             WindowManager.LayoutParams lWindowParams = new WindowManager.LayoutParams();
             lWindowParams.width = WindowManager.LayoutParams.MATCH_PARENT;
@@ -215,7 +215,7 @@ public class RepairedDialog {
             @Override
             public void run() {
                 ScrollView scrollView =
-                        ((ScrollView) dialog.findViewById(R.id.ScrollView));
+                        dialog.findViewById(R.id.ScrollView);
                 if (scrollView != null) scrollView.smoothScrollTo(0, 0);
             }
         }, 100);

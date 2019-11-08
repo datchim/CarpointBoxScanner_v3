@@ -47,10 +47,10 @@ public class UserDialog {
             dialog.setContentView(R.layout.dialog_users);
             dialog.setTitle(mActivity.getResources().getString(R.string.login));
 
-            editText_password = (EditText) dialog.findViewById(R.id.password);
-            Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
-            Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
-            textVievType = (AutoCompleteTextView) dialog.findViewById (R.id.autocompletetextview);
+            editText_password = dialog.findViewById(R.id.password);
+            Button btnOk = dialog.findViewById(R.id.btn_ok);
+            Button btnCancel = dialog.findViewById(R.id.btn_cancel);
+            textVievType = dialog.findViewById (R.id.autocompletetextview);
 
             WindowManager.LayoutParams lWindowParams = new WindowManager.LayoutParams();
             lWindowParams.width = WindowManager.LayoutParams.MATCH_PARENT;

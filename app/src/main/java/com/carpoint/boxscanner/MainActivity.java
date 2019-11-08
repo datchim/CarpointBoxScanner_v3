@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             setContentView(R.layout.activity_main);
 
-            ((Button) findViewById(R.id.start_scanning)).setOnClickListener(new OnClickListener() {
+            findViewById(R.id.start_scanning).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (!Functions.checkUpdateAndHWEnable(MainActivity.this)) {
@@ -118,21 +118,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            ((Button) findViewById(R.id.list_error)).setOnClickListener(new OnClickListener() {
+            findViewById(R.id.list_error).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     downloadList(tagErrorList);
                 }
             });
 
-            ((Button) findViewById(R.id.list_error2)).setOnClickListener(new OnClickListener() {
+            findViewById(R.id.list_error2).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     downloadList(tagErrorList2);
                 }
             });
 
-            ((Button) findViewById(R.id.list_uncompleted)).setOnClickListener(new OnClickListener() {
+            findViewById(R.id.list_uncompleted).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     downloadList(tagUncompleteProto);
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            ((Button) findViewById(R.id.nfc_write)).setOnClickListener(new OnClickListener() {
+            findViewById(R.id.nfc_write).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(MainActivity.this, NFCWrite.class);
